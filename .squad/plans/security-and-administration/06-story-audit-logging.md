@@ -47,7 +47,7 @@ Record who did what, when and from where, in the **same transaction** as the cha
 4. `src/CustomerSupportCrm.Application/Abstractions/Authentication/ICurrentUser.cs` — lines 10–27. `IsAuthenticated` and `UserId` (throws when anonymous — always check `IsAuthenticated` first).
 5. `src/CustomerSupportCrm.Infrastructure/Persistence/ApplicationDbContext.cs` — lines 10–30. DbSets at 12–18; `ApplyConfigurationsFromAssembly` at 22; `UserId` value conversion at 27 (needed for `AuditLog.ActorUserId`).
 6. `src/CustomerSupportCrm.Application/Abstractions/Persistence/IApplicationDbContext.cs` — lines 11–22. Handlers query through this interface.
-7. `src/CustomerSupportCrm.Infrastructure/DependencyInjection.cs` — `AddPersistence` lines 37–63 and `AddIdentityServices` lines 65–103; the audit registrations sit at 101–102. `TimeProvider.System` and `AddHttpContextAccessor` are registered at 28–29.
+7. `src/CustomerSupportCrm.Infrastructure/DependencyInjection.cs` — `AddPersistence` lines 37–63 and `AddIdentityServices` lines 65–103; the `IAuditTrail` registration is line 102 (line 101 is `IRequestContext` from Story 02). `TimeProvider.System` and `AddHttpContextAccessor` are registered at 28–29.
 8. `src/CustomerSupportCrm.Infrastructure/Persistence/Interceptors/AuditableEntityInterceptor.cs` — lines 9–50. Stamps `IAuditableEntity` fields only; **not** an audit-log writer. Do not add audit-row logic here.
 9. `src/CustomerSupportCrm.Application/Common/Pagination/PagedResult.cs` — lines 6–23. `PagedResult<T>.Map`, `PaginationExtensions.DefaultPageSize = 25`, `MaxPageSize = 100`, `ToPagedResultAsync` (query must be ordered).
 10. `src/CustomerSupportCrm.Application/Common/Validation/CommonRules.cs` — lines 16–20. `ValidPage()` / `ValidPageSize()`.

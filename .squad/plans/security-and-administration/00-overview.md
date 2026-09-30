@@ -17,10 +17,10 @@ Plans are generated one at a time, after the previous story is implemented, so e
 
 Note: `IPasswordHasher` moved from P2-02 into Story 01 because the bootstrap-admin seeder needs it.
 
-All seven stories were implemented in `customer-support-crm-api` commit `0f87e2d` (feat: add identity, roles, permissions and audit logging). Story 01 was planned before implementation; plans 02–07 are **as-built** plans written afterwards, and their paths and line numbers refer to `0f87e2d`. Each one lists where the code differs from its intake.
+All seven stories were implemented in `customer-support-crm-api` commit `0f87e2d` (feat: add identity, roles, permissions and audit logging). Plan 01 was written before implementation and later revised; plans 01–07 are all **as-built** plans, and their paths and line numbers refer to `0f87e2d`. Each one lists where the code differs from its intake.
 
 Known gaps and drift:
 
 - **Story 07 is partial.** `0f87e2d` has auth rate limiting and strict CORS, but no secure-headers middleware (nosniff, X-Frame-Options, Referrer-Policy, CSP), no `UseHsts`, no Server-header removal, no configurable `MaxRequestBodySize`, and no startup failure when `Cors:AllowedOrigins` is empty outside Development.
 - **`GET /auth/me` does not check `IsActive`.** A disabled user keeps getting 200 until the access token expires (see plan 03, Edge Cases).
-- **Plan 01 no longer matches the code.** The real catalog is 13 flat constants in `Domain/Roles/Permissions.cs` (no `users.view` / `roles.view`), `Role` lives in `Domain/Roles`, the migration is `InitialIdentity`, and seeding is `DatabaseInitializer` with roles Administrator (system), Manager and Agent.
+- **Dev bootstrap credentials are committed** in `appsettings.Development.json` (`Bootstrap` section, `InitializeOnStartup: true`); the intake asked for user-secrets (see plan 01, Deviations).

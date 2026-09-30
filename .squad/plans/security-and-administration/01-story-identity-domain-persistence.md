@@ -1,9 +1,12 @@
 # Story 01 — Identity domain & persistence (Story: P2-01)
 
+> As-built plan: revised after implementation in `customer-support-crm-api` commit `0f87e2d`; paths and line numbers refer to that commit.
+
 ## Prerequisites
 
 - Phase 1 (Backend Platform) completed in `customer-support-crm-api` (commit `c3c7815 feat: add Phase 1 API foundation`).
 - Local PostgreSQL reachable at the `Database:ConnectionString` in `src/CustomerSupportCrm.Api/appsettings.Development.json` (only needed for the migration/seed verification steps).
+- Next: [02-story-authentication-jwt-and-refresh-tokens.md](02-story-authentication-jwt-and-refresh-tokens.md).
 - All paths below are relative to the **`customer-support-crm-api/`** repo root.
 
 ---
@@ -12,444 +15,301 @@
 
 Add the identity domain model and its persistence so later Phase 2 stories (login, authorization, user/role management, audit) have something to build on:
 
-1. `User`, `Role`, `UserRole`, `RolePermission`, `RefreshToken` in `Domain/Users`, plus a code-defined `Permissions` catalog.
-2. EF Core configurations, DbSets and the first migration **`AddIdentity`**.
-3. An idempotent **`IdentitySeeder`** that creates the system roles and, when configured, a bootstrap administrator.
-4. `IPasswordHasher` abstraction + implementation (the seeder needs it; P2-02 reuses it).
+1. `User` + `UserRole` and `RefreshToken` in `Domain/Users`; `Role` + `RolePermission` and the code-defined `Permissions` catalog in `Domain/Roles`; strongly typed `UserId` / `RoleId`; the `EmailAddress` value object; `Entity<TId>` and `IAuditableEntity` base types.
+2. `IApplicationDbContext`, EF Core configurations, DbSets, strongly typed id converters, the `xmin` concurrency convention, the `AuditableEntityInterceptor`, and the first migration **`InitialIdentity`**.
+3. An idempotent **`DatabaseInitializer`** that migrates, seeds the Administrator system role plus Manager/Agent defaults, and creates a bootstrap administrator from `Bootstrap:*` when no users exist.
+4. `IPasswordHasher` abstraction + `IdentityPasswordHasher` (the initializer needs it; P2-02 reuses it).
 
-**Not in scope:** HTTP endpoints, JWT, login, audit log, organization/branch/department scoping. **Do not touch** `docker-compose.yml`, `deploy/`, `.github/` or anything under `tests/`.
+**Deviations from the intake (follow the real code):**
+
+| Intake | As built (`0f87e2d`) |
+|---|---|
+| Everything in `Domain/Users` | `Role`, `RolePermission`, `RoleId`, `Permissions` live in `Domain/Roles`; `EmailAddress` in `Domain/Shared`; `Entity<TId>` / `IAuditableEntity` in `Domain/Common`. |
+| `Guid` ids | Strongly typed `UserId` / `RoleId` (`readonly record struct`, UUIDv7), stored as `uuid` through converters in `ConfigureConventions`. `RefreshToken` uses `Entity<Guid>`. |
+| Nested catalog with 15 codes (`users.view`, `roles.view`, …), `IsDefined` | 13 **flat** constants (`TicketsView`, `UsersManage`, …); no `users.view` / `roles.view`; method is `IsKnown`. |
+| `Email` + `NormalizedEmail`, `FullName`, `PreferredCulture`, `SecurityStamp`, `IsActive` bool, `AccessFailedCount` | Single lower-cased `Email` (via `EmailAddress`, max 254) with unique index; `DisplayName`; `UserStatus` enum (`Active`/`Disabled`) with computed `IsActive`; `FailedLoginAttempts`. **No culture and no security stamp.** |
+| `RecordFailedLogin(now, maxAttempts, lockoutDuration)` | `RecordFailedLogin(now)`; constants `MaxFailedLoginAttempts = 5`, `LockoutDuration = 15 min` on `User`. |
+| `Activate` / `Deactivate` / `AssignRoles` | `Enable` / `Disable` / `SetRoles`; `Create` takes the role ids. |
+| `Role.Rename` guard for system roles, `SetPermissions` | `Role.Update(name, description, permissions)` and `EnsureCanBeDeleted()`; both throw `ROLE_IS_SYSTEM` on system roles. `CreateAdministrator()` / `GrantAllPermissions()` for the system role. |
+| `RefreshToken.FamilyId`, `MarkReplaced`, string `RevokedReason` | `SessionId`, `UsedAt`, `Rotate(...)` returning the successor, `IsSpent`, enum `RefreshTokenRevocationReason`; `Revoke` is idempotent (keeps first reason). |
+| `IdentityErrorCodes` class | Codes are constants on the owning type (`EmailAddress.InvalidCode`, `User.InvalidDisplayNameCode`, `Role.SystemRoleCode`, …). |
+| Timestamps passed as `now` into domain methods | `CreatedAt/By`, `UpdatedAt/By` (nullable) are stamped by `AuditableEntityInterceptor` from `TimeProvider` + `ICurrentUser`. |
+| `SecurityStamp` concurrency token | PostgreSQL `xmin` row version on `users`, `roles`, `refresh_tokens` (`HasXminConcurrencyToken`). |
+| Migration `AddIdentity` | `20260930092037_InitialIdentity` — also creates `audit_logs` (Story 06), because all stories shipped in one commit. |
+| `IdentitySeeder`, roles Administrator/Supervisor/Agent, `Identity:BootstrapAdmin`, `seed` command | `DatabaseInitializer` (migrate + seed), roles **Administrator** (only system role), **Manager**, **Agent** (ordinary roles, first run only), section **`Bootstrap`** (`AdminEmail`, `AdminDisplayName`, `AdminPassword`); runs via `--init-database` or `Database:InitializeOnStartup`. |
+| No credentials in `appsettings.Development.json`; use user-secrets | Dev-only `Bootstrap` values **are** committed in `appsettings.Development.json` (lines 22–25), with `InitializeOnStartup: true`. |
+| `Microsoft.Extensions.Identity.Core` package | Not added: the Infrastructure `FrameworkReference Microsoft.AspNetCore.App` already supplies `PasswordHasher<T>`. |
+| `PasswordVerification` enum | `PasswordVerificationResult` (Application), aliased against the Identity enum of the same name. |
+
+**Not in scope:** HTTP endpoints, JWT, login, `ICurrentUser` (Story 03), `AuditLog` / `IAuditTrail` (Story 06), organization/branch/department scoping. **Do not touch** `docker-compose.yml`, `deploy/`, `.github/` or anything under `tests/`.
 
 ---
 
 ## Context — Read These Files First
 
-1. `src/CustomerSupportCrm.Domain/Common/DomainException.cs` — lines 1–10. `DomainException(string code, string message)`; every domain invariant below throws this with a stable UPPER_SNAKE code.
-2. `src/CustomerSupportCrm.Infrastructure/Persistence/ApplicationDbContext.cs` — whole file (11 lines). `OnModelCreating` already calls `ApplyConfigurationsFromAssembly`, so new `IEntityTypeConfiguration<T>` classes are picked up automatically. Snake_case naming is applied in DI, not here.
-3. `src/CustomerSupportCrm.Infrastructure/DependencyInjection.cs` — lines 13–41. `AddInfrastructure` → private `AddPersistence`; follow the `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()` pattern at lines 24–27 for new options.
-4. `src/CustomerSupportCrm.Infrastructure/Persistence/DatabaseOptions.cs` — lines 1–17. Template for an options class (`SectionName` const, `init` properties, DataAnnotations).
-5. `src/CustomerSupportCrm.Api/Program.cs` — lines 11–42. Host setup; the seed command is added between `builder.Build()` (line 22) and the middleware (line 26).
-6. `src/CustomerSupportCrm.Application/Common/Exceptions/AppException.cs` — lines 1–10. Application exceptions are separate from `DomainException`; do not mix them in Domain.
-7. `Directory.Packages.props` — `ItemGroup Label="Persistence"` and `Label="Application"`. Package versions are central; `.csproj` files use `PackageReference` **without** `Version`.
-8. `Directory.Build.props` — lines 1–12. `TreatWarningsAsErrors`, `Nullable`, `AnalysisLevel latest-recommended`: every new file must compile warning-free (seal classes, no unused usings, pass `CancellationToken`).
-9. `tests/CustomerSupportCrm.Api.Tests/ApiFactory.cs` — lines 14–30 (**read only, do not edit**). The API test host runs in the **Development** environment against an **unreachable** database. Anything that touches the DB at startup would break these tests — that is why seeding is an explicit command, not a hosted service.
-10. `tests/CustomerSupportCrm.IntegrationTests/PostgresApiFactory.cs` — lines 23–27 (**read only**). Integration host uses environment `Test` against an empty, un-migrated database — same constraint.
-11. `dotnet-tools.json` — `dotnet-ef` 10.0.12 is the local tool used to create the migration.
+1. `src/CustomerSupportCrm.Domain/Common/DomainException.cs` (c3c7815) — lines 1–10. `DomainException(string code, string message)`; every domain invariant below throws this with a stable UPPER_SNAKE code.
+2. `src/CustomerSupportCrm.Infrastructure/Persistence/ApplicationDbContext.cs` (c3c7815) — whole file (11 lines). `OnModelCreating` already calls `ApplyConfigurationsFromAssembly` (line 9), so new `IEntityTypeConfiguration<T>` classes are picked up automatically. Snake_case naming is applied in DI, not here.
+3. `src/CustomerSupportCrm.Infrastructure/DependencyInjection.cs` (c3c7815) — lines 13–41. `AddInfrastructure` → private `AddPersistence`; the `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()` pattern is at lines 24–27; `AddDbContext` at 29–37.
+4. `src/CustomerSupportCrm.Infrastructure/Persistence/DatabaseOptions.cs` (c3c7815) — template for an options class (`SectionName` const, `init` properties, DataAnnotations); `EnableSensitiveDataLogging` already exists.
+5. `src/CustomerSupportCrm.Api/Program.cs` (c3c7815) — lines 11–30. Host setup; the initializer hook goes directly after `var app = builder.Build();` (line 22), before the middleware (line 26).
+6. `Directory.Packages.props` — `ItemGroup Label="Persistence"`. Package versions are central; `.csproj` files use `PackageReference` **without** `Version`.
+7. `Directory.Build.props` — `TreatWarningsAsErrors`, `Nullable`, `AnalysisLevel latest-recommended`: every new file must compile warning-free.
+8. `tests/CustomerSupportCrm.Api.Tests/ApiFactory.cs` (**read only**) — the API test host runs in Development against an **unreachable** database, so it must force `Database:InitializeOnStartup=false` (0f87e2d line 25).
+9. `tests/CustomerSupportCrm.IntegrationTests/PostgresApiFactory.cs` (**read only**) — 0f87e2d lines 69–74: environment `Test`, `InitializeOnStartup=true`, `Bootstrap:AdminEmail` / `AdminPassword` set per run.
+10. `dotnet-tools.json` — `dotnet-ef` is the local tool used to create the migration.
 
 ---
 
 ## Backend Tasks
 
-### 1 — Package
+### 1 — Packages
 
-File: `Directory.Packages.props` — add to the `Label="Persistence"` group:
+File: `Directory.Packages.props` — in `Label="Persistence"` add `Microsoft.EntityFrameworkCore` and `Microsoft.EntityFrameworkCore.Relational`, both `10.0.12` (lines 22–23).
 
-```xml
-<PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="10.0.12" />
-```
+File: `src/CustomerSupportCrm.Application/CustomerSupportCrm.Application.csproj` — `<PackageReference Include="Microsoft.EntityFrameworkCore" />` (line 12; `IApplicationDbContext` exposes `DbSet<T>`).
 
-File: `src/CustomerSupportCrm.Infrastructure/CustomerSupportCrm.Infrastructure.csproj` — add `<PackageReference Include="Microsoft.Extensions.Identity.Core" />` to the existing package `ItemGroup` (keep alphabetical order).
+File: `src/CustomerSupportCrm.Infrastructure/CustomerSupportCrm.Infrastructure.csproj` — `<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />` (line 10). Line 9 (`JwtBearer`) is Story 02. **Do not** add `Microsoft.Extensions.Identity.Core`; `FrameworkReference Microsoft.AspNetCore.App` (line 4, Phase 1) provides `PasswordHasher<T>`.
 
-### 2 — Permission catalog
+`src/CustomerSupportCrm.Domain/CustomerSupportCrm.Domain.csproj` stays empty — Domain has no package or framework references.
 
-Create file: `src/CustomerSupportCrm.Domain/Users/Permissions.cs`
+### 2 — Common and shared domain types
 
-```csharp
-namespace CustomerSupportCrm.Domain.Users;
+Create file: `src/CustomerSupportCrm.Domain/Common/Entity.cs` (lines 1–12) — `public abstract class Entity<TId> where TId : notnull`; `protected Entity(TId id)`; protected parameterless ctor for EF (`Id = default!`); `public TId Id { get; private init; }`.
 
-/// <summary>
-/// Code-defined permission catalog. Codes are stable and stored in role_permissions;
-/// never rename or remove a published code.
-/// </summary>
-public static class Permissions
-{
-    public static class Users
-    {
-        public const string View = "users.view";
-        public const string Manage = "users.manage";
-    }
+Create file: `src/CustomerSupportCrm.Domain/Common/IAuditableEntity.cs` (lines 1–15) — `DateTimeOffset CreatedAt`, `Guid? CreatedBy`, `DateTimeOffset? UpdatedAt`, `Guid? UpdatedBy` (getters only). Doc comment: set by persistence, never by domain code.
 
-    public static class Roles
-    {
-        public const string View = "roles.view";
-        public const string Manage = "roles.manage";
-    }
+Create file: `src/CustomerSupportCrm.Domain/Shared/EmailAddress.cs` (lines 1–48; delete `Domain/Shared/.gitkeep`)
 
-    public static class Audit
-    {
-        public const string View = "audit.view";
-    }
+- `public sealed record EmailAddress`; `MaxLength = 254`; `InvalidCode = "INVALID_EMAIL_ADDRESS"`.
+- `Create(string? value)` (lines 19–29): normalize, then reject empty, over-long or malformed with `DomainException(InvalidCode, ...)`.
+- `Normalize(string? value)` (lines 32–35): `Trim().ToLowerInvariant()`, `CA1308` suppressed locally; used for lookups without validation.
+- `IsWellFormed` (lines 39–47): exactly one `@`, not first/last, a `.` after it, no whitespace. Deliverability is not checked.
 
-    public static class Tickets
-    {
-        public const string View = "tickets.view";
-        public const string Create = "tickets.create";
-        public const string Update = "tickets.update";
-        public const string Assign = "tickets.assign";
-        public const string Delete = "tickets.delete";
-    }
+### 3 — Permission catalog and roles
 
-    public static class Customers
-    {
-        public const string View = "customers.view";
-        public const string Create = "customers.create";
-        public const string Update = "customers.update";
-    }
+Create file: `src/CustomerSupportCrm.Domain/Roles/Permissions.cs` (lines 1–37)
 
-    public static class Reports
-    {
-        public const string View = "reports.view";
-    }
+- 13 flat `const string`s (lines 9–24): `TicketsView/Create/Update/Assign/Delete`, `CustomersView/Create/Update`, `ReportsView`, `UsersManage`, `RolesManage`, `SettingsManage`, `AuditView` → `tickets.view` … `audit.view`.
+- `All` (lines 26–32), private `HashSet<string> Known` (line 34), `IsKnown(string)` (line 36). Doc comment: add codes, never rename existing ones.
 
-    public static class Settings
-    {
-        public const string Manage = "settings.manage";
-    }
+Create file: `src/CustomerSupportCrm.Domain/Roles/RoleId.cs` — `public readonly record struct RoleId(Guid Value)`; `New()` → `Guid.CreateVersion7()`; `ToString()` → `Value.ToString()`.
 
-    public static IReadOnlyList<string> All { get; } =
-    [
-        Users.View, Users.Manage,
-        Roles.View, Roles.Manage,
-        Audit.View,
-        Tickets.View, Tickets.Create, Tickets.Update, Tickets.Assign, Tickets.Delete,
-        Customers.View, Customers.Create, Customers.Update,
-        Reports.View,
-        Settings.Manage,
-    ];
+Create file: `src/CustomerSupportCrm.Domain/Roles/Role.cs` (lines 1–163)
 
-    private static readonly HashSet<string> Defined = new(All, StringComparer.Ordinal);
+- `public sealed class Role : Entity<RoleId>, IAuditableEntity` (line 9). Constants: `NameMaxLength = 100`, `DescriptionMaxLength = 500`, `AdministratorName = "Administrator"`, codes `ROLE_IS_SYSTEM`, `UNKNOWN_PERMISSION`, `INVALID_ROLE_NAME` (lines 11–18).
+- Properties (lines 34–52): `Name`, `NormalizedName`, `Description?`, `IsSystem`, `Permissions` (backed by `List<RolePermission> _permissions`), audit stamps, computed `PermissionCodes` (ordinal-sorted).
+- `Create(name, description, permissions)` (lines 54–59) — non-system role. `CreateAdministrator()` (lines 62–67) — system role holding every permission.
+- `Normalize(name)` (lines 69–73) → `Trim().ToUpperInvariant()`.
+- `Update(...)` (lines 75–81) and `EnsureCanBeDeleted()` (line 83) call `EnsureNotSystem()` → `ROLE_IS_SYSTEM`.
+- `GrantAllPermissions()` (lines 86–94) — `InvalidOperationException` for non-system roles; replaces with `Permissions.All`.
+- `ReplacePermissions` (lines 110–125) — distinct, first unknown code → `DomainException(UNKNOWN_PERMISSION)`, removes dropped rows and adds new ones (existing rows are kept).
+- Name/description validation (lines 98–108, 135–144) → `INVALID_ROLE_NAME`; empty description becomes `null`.
+- `RolePermission` in the same file (lines 147–163): `RoleId RoleId`, `string Permission`; internal ctor, private EF ctor.
 
-    public static bool IsDefined(string code) => Defined.Contains(code);
-}
-```
+### 4 — Users
 
-### 3 — Error codes
+Create file: `src/CustomerSupportCrm.Domain/Users/UserId.cs` — same shape as `RoleId`. Delete `Domain/Users/.gitkeep`.
 
-Create file: `src/CustomerSupportCrm.Domain/Users/IdentityErrorCodes.cs` — `public static class IdentityErrorCodes` with `const string`s:
+Create file: `src/CustomerSupportCrm.Domain/Users/User.cs` (lines 1–153)
 
-| Constant | Value | Thrown when |
-|---|---|---|
-| `InvalidEmail` | `USER_INVALID_EMAIL` | email empty, > 256 chars, or no `@` |
-| `InvalidFullName` | `USER_INVALID_FULL_NAME` | full name empty/whitespace or > 200 chars |
-| `UnsupportedCulture` | `USER_UNSUPPORTED_CULTURE` | culture not `en` / `ar` |
-| `InvalidRoleName` | `ROLE_INVALID_NAME` | role name empty or > 100 chars |
-| `SystemRoleReadOnly` | `SYSTEM_ROLE_READ_ONLY` | rename of a system role |
-| `UnknownPermission` | `UNKNOWN_PERMISSION` | `Permissions.IsDefined` is false |
-| `RefreshTokenAlreadyRevoked` | `REFRESH_TOKEN_ALREADY_REVOKED` | revoke/replace on a revoked token |
+- `enum UserStatus { Active, Disabled }` (lines 7–11).
+- `public sealed class User : Entity<UserId>, IAuditableEntity` (line 16). Constants: `DisplayNameMaxLength = 200`, `MaxFailedLoginAttempts = 5`, `InvalidDisplayNameCode = "INVALID_DISPLAY_NAME"`, `LockoutDuration = 15 min` (lines 18–23).
+- Properties (lines 41–67): `Email` (normalized), `DisplayName`, `PasswordHash`, `Status`, `FailedLoginAttempts`, `LockoutEndsAt`, `LastLoginAt`, `Roles`, audit stamps, computed `IsActive` and `RoleIds`.
+- `Create(EmailAddress, displayName, passwordHash, IEnumerable<RoleId>)` (lines 69–76) — starts `Active`.
+- `Rename` (lines 78–87) → `INVALID_DISPLAY_NAME`; `ChangePasswordHash` (lines 89–93) → `ArgumentException` on blank (programming error).
+- `SetRoles` (lines 95–104) — distinct replace; `HasRole` (line 106).
+- `IsLockedOut(now)` (line 108); `RecordFailedLogin(now)` (lines 111–119) locks at the 5th failure and resets the counter; `RecordSuccessfulLogin(now)` (lines 121–126).
+- `Disable()` (line 128); `Enable()` (lines 130–135) also clears failures and lockout.
+- `UserRole` in the same file (lines 138–153): `UserId`, `RoleId`; internal ctor, private EF ctor.
+- No `ToString()` override: `PasswordHash` is never formatted.
 
-### 4 — User aggregate
+Create file: `src/CustomerSupportCrm.Domain/Users/RefreshToken.cs` (lines 1–108)
 
-Create file: `src/CustomerSupportCrm.Domain/Users/User.cs`
+- `enum RefreshTokenRevocationReason { Logout, ReuseDetected, UserDisabled, PasswordChanged }` (lines 5–11).
+- `public sealed class RefreshToken : Entity<Guid>` (line 18); `UserAgentMaxLength = 512`, `IpAddressMaxLength = 64`, `InactiveCode = "REFRESH_TOKEN_INACTIVE"` (lines 20–23).
+- Properties (lines 42–62): `UserId`, `SessionId`, `TokenHash`, `CreatedAt`, `ExpiresAt`, `UsedAt`, `ReplacedByTokenId`, `RevokedAt`, `RevokedReason`, `CreatedByIp`, `UserAgent`.
+- `Issue(userId, tokenHash, now, lifetime, ip, userAgent)` (lines 65–66) starts a new session; `IsActive(now)` (line 68); `IsSpent` (line 71); `Rotate(...)` (lines 74–85) throws `REFRESH_TOKEN_INACTIVE` when not active; `Revoke(now, reason)` (lines 87–96) is a no-op when already revoked.
+- Private `Create` (lines 98–104) validates hash and positive lifetime; `Truncate` (lines 106–107) caps IP/user agent and turns empty into `null`. The domain only ever sees the hash.
 
-- `public sealed class User` with **private setters** and a private parameterless constructor for EF.
-- Properties: `Guid Id`, `string Email`, `string NormalizedEmail`, `string FullName`, `string PasswordHash`, `bool IsActive`, `string PreferredCulture`, `string SecurityStamp`, `int AccessFailedCount`, `DateTimeOffset? LockoutEndsAt`, `DateTimeOffset? LastLoginAt`, `DateTimeOffset CreatedAt`, `DateTimeOffset UpdatedAt`.
-- Roles collection: `private readonly List<UserRole> _roles = [];` exposed as `IReadOnlyCollection<UserRole> Roles => _roles;`.
-- Constants: `EmailMaxLength = 256`, `FullNameMaxLength = 200`, `CultureMaxLength = 5`, `PasswordHashMaxLength = 512`, `SecurityStampMaxLength = 64`, `SupportedCultures = ["en", "ar"]`.
+### 5 — Persistence abstraction and model
 
-Behaviors (all take `DateTimeOffset now` where time matters; never call `DateTime.UtcNow`):
+Create file: `src/CustomerSupportCrm.Application/Abstractions/Persistence/IApplicationDbContext.cs` (delete `Abstractions/Persistence/.gitkeep`) — `DbSet<User> Users`, `DbSet<Role> Roles`, `DbSet<RefreshToken> RefreshTokens`, `SaveChangesAsync` (lines 13–17, 21). `AuditLogs` (line 19) and its using (line 1) are Story 06.
+
+File: `src/CustomerSupportCrm.Infrastructure/Persistence/ApplicationDbContext.cs`
+
+- Implement `IApplicationDbContext` (line 10); DbSets `Users`, `Roles`, `RefreshTokens` (lines 12–16). `AuditLogs` (line 18) is Story 06.
+- `ConfigureConventions` (lines 25–29): `Properties<UserId>()` / `Properties<RoleId>()` `.HaveConversion<StronglyTypedIdConverters.…>()`.
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/StronglyTypedIdConverters.cs` (lines 1–13) — nested `UserIdConverter` / `RoleIdConverter` : `ValueConverter<T, Guid>`.
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/PostgresConventions.cs` (lines 1–15) — `HasXminConcurrencyToken<T>()`: shadow `uint Version` → column `xmin`, type `xid`, `IsRowVersion()`.
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/UserConfiguration.cs`
+
+- `UserConfiguration` (lines 9–35): table `users`; `Id` `ValueGeneratedNever()`; `Email` max `EmailAddress.MaxLength` + unique index (lines 17–18); `DisplayName` 200; `PasswordHash` 512; `Status` stored as string (20); `HasMany(Roles)` cascade with field access (lines 24–28); ignore `IsActive`, `RoleIds`; `HasXminConcurrencyToken()` (line 33).
+- `UserRoleConfiguration` (lines 37–51): table `user_roles`; key `(UserId, RoleId)`; index on `RoleId`; FK to `Role` with `DeleteBehavior.Restrict`.
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/RoleConfiguration.cs`
+
+- `RoleConfiguration` (lines 7–30): table `roles`; unique index on `NormalizedName` (line 17); `Permissions` cascade with field access (lines 20–24); ignore `PermissionCodes`; `HasXminConcurrencyToken()` (line 28).
+- `RolePermissionConfiguration` (lines 32–40): table `role_permissions`; key `(RoleId, Permission)`; `Permission` max 100.
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/RefreshTokenConfiguration.cs` (lines 7–34): table `refresh_tokens`; `TokenHash` 128 + unique index; indexes on `SessionId` and `UserId`; `RevokedReason` as string (32); FK to `User` cascade, no navigation; ignore `IsSpent`; `HasXminConcurrencyToken()` (line 32).
+
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Interceptors/AuditableEntityInterceptor.cs` (lines 1–50) — `SaveChangesInterceptor` taking `TimeProvider` and `ICurrentUser` (Story 03); on `Added` sets `CreatedAt/By`, on `Modified` **or when a child collection changed** sets `UpdatedAt/By` (lines 35–48). Actor is `null` when unauthenticated (line 33). It writes no audit rows (see Story 06).
+
+### 6 — Password hasher
+
+Create file: `src/CustomerSupportCrm.Application/Abstractions/Authentication/IPasswordHasher.cs` (lines 1–17; delete `Abstractions/Authentication/.gitkeep`)
 
 ```csharp
-public static User Create(string email, string fullName, string passwordHash, string culture, DateTimeOffset now);
-public static string Normalize(string email) => email.Trim().ToUpperInvariant();
-public void Rename(string fullName, DateTimeOffset now);
-public void ChangeCulture(string culture, DateTimeOffset now);
-public void ChangePasswordHash(string passwordHash, DateTimeOffset now);   // also rotates SecurityStamp
-public void Activate(DateTimeOffset now);                                   // clears AccessFailedCount + LockoutEndsAt
-public void Deactivate(DateTimeOffset now);
-public void AssignRoles(IEnumerable<Guid> roleIds, DateTimeOffset now);     // replace set, distinct, keeps existing rows that stay
-public void RecordFailedLogin(DateTimeOffset now, int maxAttempts, TimeSpan lockoutDuration);
-public void RecordSuccessfulLogin(DateTimeOffset now);                     // resets counter, clears lockout, sets LastLoginAt
-public bool IsLockedOut(DateTimeOffset now) => LockoutEndsAt is { } end && end > now;
-```
-
-- `Create`: `Id = Guid.CreateVersion7(now)`, trims email/full name, validates (codes from task 3), `IsActive = true`, `SecurityStamp = Guid.NewGuid().ToString("N")`, `CreatedAt = UpdatedAt = now`.
-- `RecordFailedLogin`: increments `AccessFailedCount`; when it reaches `maxAttempts`, set `LockoutEndsAt = now + lockoutDuration` and reset `AccessFailedCount = 0`.
-- `ChangePasswordHash`: throws `ArgumentException` on empty hash (programming error, not a domain rule).
-- Override `ToString()` is **not** added — do not expose `PasswordHash` / `SecurityStamp` through any formatting.
-
-Create file: `src/CustomerSupportCrm.Domain/Users/UserRole.cs` — `public sealed class UserRole` with `Guid UserId`, `Guid RoleId`; internal constructor used by `User.AssignRoles`; private parameterless ctor for EF.
-
-### 5 — Role aggregate
-
-Create file: `src/CustomerSupportCrm.Domain/Users/Role.cs`
-
-- Properties: `Guid Id`, `string Name`, `string NormalizedName`, `string? Description`, `bool IsSystem`, `DateTimeOffset CreatedAt`, `DateTimeOffset UpdatedAt`; `private readonly List<RolePermission> _permissions = [];` → `IReadOnlyCollection<RolePermission> Permissions`.
-- Constants: `NameMaxLength = 100`, `DescriptionMaxLength = 500`.
-- System role names as constants: `public const string Administrator = "Administrator"; Supervisor = "Supervisor"; Agent = "Agent";`
-
-```csharp
-public static Role Create(string name, string? description, bool isSystem, DateTimeOffset now);
-public static string Normalize(string name) => name.Trim().ToUpperInvariant();
-public void Rename(string name, string? description, DateTimeOffset now); // throws SYSTEM_ROLE_READ_ONLY when IsSystem and name changes
-public void SetPermissions(IEnumerable<string> codes, DateTimeOffset now);  // validates each with Permissions.IsDefined → UNKNOWN_PERMISSION; replace set, distinct
-public bool HasPermission(string code);
-```
-
-Create file: `src/CustomerSupportCrm.Domain/Users/RolePermission.cs` — `Guid RoleId`, `string PermissionCode` (max 100); internal ctor + private EF ctor.
-
-### 6 — RefreshToken
-
-Create file: `src/CustomerSupportCrm.Domain/Users/RefreshToken.cs`
-
-- Properties: `Guid Id`, `Guid UserId`, `string TokenHash` (64 hex chars, SHA-256), `Guid FamilyId`, `DateTimeOffset CreatedAt`, `DateTimeOffset ExpiresAt`, `DateTimeOffset? RevokedAt`, `string? RevokedReason` (max 100), `Guid? ReplacedByTokenId`, `string? CreatedByIp` (max 45), `string? UserAgent` (max 512, truncate longer values).
-
-```csharp
-public static RefreshToken Issue(Guid userId, string tokenHash, Guid familyId, DateTimeOffset now, TimeSpan lifetime, string? ip, string? userAgent);
-public bool IsActive(DateTimeOffset now) => RevokedAt is null && ExpiresAt > now;
-public void Revoke(DateTimeOffset now, string reason);                // throws REFRESH_TOKEN_ALREADY_REVOKED when already revoked
-public void MarkReplaced(Guid newTokenId, DateTimeOffset now);        // sets ReplacedByTokenId and revokes with reason "Rotated"
-```
-
-The domain never sees the raw token — only the hash.
-
-### 7 — EF configurations
-
-Create one file per entity in `src/CustomerSupportCrm.Infrastructure/Persistence/Configurations/`, each `internal sealed class XConfiguration : IEntityTypeConfiguration<X>`:
-
-- **`UserConfiguration.cs`** — table `users`; key `Id` with `ValueGeneratedNever()`; `HasMaxLength` from the `User` constants; unique index on `NormalizedEmail`; `HasMany(u => u.Roles).WithOne().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade)`; `Navigation(u => u.Roles).UsePropertyAccessMode(PropertyAccessMode.Field)`; `Property(u => u.SecurityStamp).IsConcurrencyToken()`.
-- **`UserRoleConfiguration.cs`** — table `user_roles`; composite key `(UserId, RoleId)`; FK to `Role` on `RoleId` with `OnDelete(DeleteBehavior.Restrict)`; index on `RoleId`.
-- **`RoleConfiguration.cs`** — table `roles`; unique index on `NormalizedName`; `HasMany(r => r.Permissions).WithOne().HasForeignKey(p => p.RoleId).OnDelete(DeleteBehavior.Cascade)`; field access mode on the navigation.
-- **`RolePermissionConfiguration.cs`** — table `role_permissions`; composite key `(RoleId, PermissionCode)`; `PermissionCode` max 100.
-- **`RefreshTokenConfiguration.cs`** — table `refresh_tokens`; unique index on `TokenHash`; indexes on `UserId` and `FamilyId`; FK to `User` on `UserId` with `OnDelete(DeleteBehavior.Cascade)` (no navigation on `User`).
-
-File: `src/CustomerSupportCrm.Infrastructure/Persistence/ApplicationDbContext.cs` — add:
-
-```csharp
-public DbSet<User> Users => Set<User>();
-public DbSet<Role> Roles => Set<Role>();
-public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-```
-
-### 8 — Password hasher
-
-Create file: `src/CustomerSupportCrm.Application/Abstractions/Authentication/IPasswordHasher.cs`
-
-```csharp
-namespace CustomerSupportCrm.Application.Abstractions.Authentication;
+public enum PasswordVerificationResult { Failed, Success, SuccessRehashNeeded }
 
 public interface IPasswordHasher
 {
     string Hash(string password);
-    PasswordVerification Verify(string passwordHash, string password);
-}
-
-public enum PasswordVerification
-{
-    Failed,
-    Success,
-    SuccessRehashNeeded,
+    PasswordVerificationResult Verify(string passwordHash, string providedPassword);
 }
 ```
 
-Delete the placeholder `src/CustomerSupportCrm.Application/Abstractions/Authentication/.gitkeep`.
+Create file: `src/CustomerSupportCrm.Infrastructure/Authentication/IdentityPasswordHasher.cs` (lines 1–27) — `internal sealed`, wraps `PasswordHasher<object>` with a static unused subject; `using` aliases `IdentityResult` / `PasswordVerificationResult` (lines 3–4) resolve the name clash; `Verify` maps `Success` / `SuccessRehashNeeded`, everything else → `Failed`. The `Infrastructure/Authentication/.gitkeep` placeholder was left in place.
 
-Create file: `src/CustomerSupportCrm.Infrastructure/Authentication/IdentityPasswordHasher.cs`:
+### 7 — Seeding
 
-```csharp
-using CustomerSupportCrm.Application.Abstractions.Authentication;
-using Microsoft.AspNetCore.Identity;
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/BootstrapOptions.cs` (lines 1–16) — `SectionName = "Bootstrap"`; `AdminEmail?`, `AdminDisplayName = "Administrator"`, `AdminPassword?`. No validation (optional).
 
-namespace CustomerSupportCrm.Infrastructure.Authentication;
+Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/DatabaseInitializer.cs` (lines 1–115) — `internal sealed partial class DatabaseInitializer(ApplicationDbContext db, IPasswordHasher passwordHasher, IOptions<BootstrapOptions> bootstrap, ILogger<DatabaseInitializer> logger)`:
 
-/// <summary>ASP.NET Core Identity's PBKDF2 (V3) hasher. The user argument is unused by the algorithm.</summary>
-internal sealed class IdentityPasswordHasher : IPasswordHasher
-{
-    private static readonly object Subject = new();
-    private readonly PasswordHasher<object> _inner = new();
+1. `InitializeAsync` (lines 37–43): `db.Database.MigrateAsync`, then roles, then administrator.
+2. `SeedRolesAsync` (lines 45–74): `firstRun = !Roles.Any()`; load the system Administrator by `NormalizedName` with permissions; create via `CreateAdministrator()` or re-sync via `GrantAllPermissions()` every run. On first run only, add `DefaultRoles` (lines 22–35): **Manager** (all tickets, all customers, `reports.view`) and **Agent** (tickets view/create/update, customers view/create/update). Save.
+3. `SeedAdministratorAsync` (lines 76–99): return if any user exists; if `AdminEmail` or `AdminPassword` is blank → warning `LogBootstrapSkipped` and return; else `User.Create(EmailAddress.Create(...), AdminDisplayName, passwordHasher.Hash(...), [administrator.Id])`, save, log `"Created initial administrator {Email}"`. Password and hash are never logged (source-generated `[LoggerMessage]`, lines 101–105).
+4. `DatabaseInitializerExtensions.InitializeDatabaseAsync(IServiceProvider, ct)` (lines 108–115) creates an async scope and runs the initializer.
 
-    public string Hash(string password) => _inner.HashPassword(Subject, password);
+No minimum password length is enforced here (the intake did not require one; Story 04 validates passwords for new users).
 
-    public PasswordVerification Verify(string passwordHash, string password) =>
-        _inner.VerifyHashedPassword(Subject, passwordHash, password) switch
-        {
-            PasswordVerificationResult.Success => PasswordVerification.Success,
-            PasswordVerificationResult.SuccessRehashNeeded => PasswordVerification.SuccessRehashNeeded,
-            _ => PasswordVerification.Failed,
-        };
-}
-```
-
-Delete `src/CustomerSupportCrm.Infrastructure/Authentication/.gitkeep`.
-
-### 9 — Seeder
-
-Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/BootstrapAdminOptions.cs`
-
-```csharp
-public sealed class BootstrapAdminOptions
-{
-    public const string SectionName = "Identity:BootstrapAdmin";
-
-    public string? Email { get; init; }
-    public string? Password { get; init; }
-    public string FullName { get; init; } = "System Administrator";
-}
-```
-
-Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/IdentitySeeder.cs` — `internal sealed class IdentitySeeder(ApplicationDbContext db, IPasswordHasher hasher, TimeProvider time, IOptions<BootstrapAdminOptions> admin, ILogger<IdentitySeeder> logger)` with `public async Task SeedAsync(CancellationToken cancellationToken)`:
-
-1. For each system role, load by `NormalizedName`; create when missing (`isSystem: true`).
-   - **Administrator** → `Permissions.All` (re-applied every run so new codes reach admins).
-   - **Supervisor** → all `tickets.*`, all `customers.*`, `reports.view`, `users.view`, `audit.view` — **only on creation** (admins may edit it later in P2-05).
-   - **Agent** → `tickets.view`, `tickets.create`, `tickets.update`, `customers.view`, `customers.create`, `customers.update` — **only on creation**.
-2. `SaveChangesAsync`.
-3. If `await db.Users.AnyAsync(ct)` is true → log "Users exist; bootstrap admin skipped" and return.
-4. If `Email` or `Password` is null/whitespace → log a **warning** "Identity:BootstrapAdmin not configured; no administrator created" and return.
-5. If `Password.Length < 10` → throw `InvalidOperationException("Identity:BootstrapAdmin:Password must be at least 10 characters.")`.
-6. Create the user (`culture "en"`), `AssignRoles([administrator.Id])`, save. Log `"Bootstrap administrator {Email} created"` — **never** log the password or hash.
-
-Create file: `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/SeedingExtensions.cs`
-
-```csharp
-public static class SeedingExtensions
-{
-    public const string SeedCommand = "seed";
-
-    public static async Task SeedIdentityAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
-    {
-        await using var scope = services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<IdentitySeeder>().SeedAsync(cancellationToken);
-    }
-}
-```
-
-Delete `src/CustomerSupportCrm.Infrastructure/Persistence/Seed/.gitkeep`.
-
-### 10 — DI registration
+### 8 — DI registration
 
 File: `src/CustomerSupportCrm.Infrastructure/DependencyInjection.cs`
 
-- In `AddInfrastructure`, after `services.AddPersistence();` (line 17), call a new private extension `services.AddIdentityServices();`. **Do not** name it `AddIdentityCore` — that name clashes with ASP.NET Core Identity's own extension.
-- `AddIdentityServices` body:
+- `AddInfrastructure`: `services.AddSingleton(TimeProvider.System);` (line 28) and the `services.AddIdentityServices();` call (line 32). `AddHttpContextAccessor` (line 29) serves Stories 02/03.
+- `AddPersistence`: `AddScoped<AuditableEntityInterceptor>()` (line 44) and `.AddInterceptors(...)` on the context (line 54); `AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>())` (line 56); `AddOptions<BootstrapOptions>().BindConfiguration(...)` (line 58, no `ValidateOnStart`); `AddScoped<DatabaseInitializer>()` (line 59).
+- `AddIdentityServices`: `services.AddSingleton<IPasswordHasher, IdentityPasswordHasher>();` (line 98). The method name avoids ASP.NET Core Identity's `AddIdentityCore`. Its JWT, policy, current-user, request-context and audit lines belong to Stories 02, 03 and 06.
+- Usings for this story: lines 2, 4, 6, 9–10 (line 8 is Phase 1).
+
+### 9 — Host wiring
+
+File: `src/CustomerSupportCrm.Infrastructure/Persistence/DatabaseOptions.cs` — add `bool InitializeOnStartup { get; init; }` with its doc comment (lines 15–19).
+
+File: `src/CustomerSupportCrm.Api/Program.cs` — usings (lines 10–12); after `var app = builder.Build();` (line 27):
 
 ```csharp
-services.TryAddSingleton(TimeProvider.System);
-services.AddSingleton<IPasswordHasher, IdentityPasswordHasher>();
-services.AddOptions<BootstrapAdminOptions>().BindConfiguration(BootstrapAdminOptions.SectionName);
-services.AddScoped<IdentitySeeder>();
-```
-
-(No `ValidateOnStart` for `BootstrapAdminOptions` — it is optional.)
-
-### 11 — Seed command in the host
-
-File: `src/CustomerSupportCrm.Api/Program.cs` — directly after `var app = builder.Build();` (line 22) insert:
-
-```csharp
-if (args.Contains(SeedingExtensions.SeedCommand, StringComparer.OrdinalIgnoreCase))
+// Deployment step: apply migrations and seed data, then exit.
+if (args.Contains("--init-database"))
 {
-    await app.Services.SeedIdentityAsync();
+    await app.Services.InitializeDatabaseAsync();
     return;
 }
-```
 
-Add `using CustomerSupportCrm.Infrastructure.Persistence.Seed;`. Do **not** seed automatically on normal startup (see Context items 9–10).
-
-### 12 — Configuration
-
-File: `src/CustomerSupportCrm.Api/appsettings.json` — add (values intentionally empty):
-
-```json
-"Identity": {
-  "BootstrapAdmin": {
-    "Email": "",
-    "Password": ""
-  }
+if (app.Services.GetRequiredService<IOptions<DatabaseOptions>>().Value.InitializeOnStartup)
+{
+    await app.Services.InitializeDatabaseAsync();
 }
 ```
 
-Do **not** put credentials in `appsettings.Development.json`.
+(lines 29–39). CORS, rate limiting, authentication and `RunAsync` lines are Stories 02, 03 and 07.
 
-### 13 — Migration
+### 10 — Configuration
 
-Run from the repo root (requires the solution to build):
+File: `src/CustomerSupportCrm.Api/appsettings.json` — `"InitializeOnStartup": false` (line 18) and the `Bootstrap` section with empty `AdminEmail` / `AdminPassword` and `AdminDisplayName "Administrator"` (lines 36–40).
+
+File: `src/CustomerSupportCrm.Api/appsettings.Development.json` — `"InitializeOnStartup": true` (line 11) and a dev-only `Bootstrap` admin (lines 22–25). Other environments supply `Bootstrap__AdminEmail` / `Bootstrap__AdminPassword` once for the first `--init-database`.
+
+### 11 — Migration
 
 ```bash
 dotnet tool restore
-dotnet ef migrations add AddIdentity --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api --output-dir Persistence/Migrations
+dotnet ef migrations add InitialIdentity --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api --output-dir Persistence/Migrations
 ```
 
-Delete `src/CustomerSupportCrm.Infrastructure/Persistence/Migrations/.gitkeep` once the migration files exist. Review the generated migration: tables `users`, `user_roles`, `roles`, `role_permissions`, `refresh_tokens`; unique indexes `ix_users_normalized_email`, `ix_roles_normalized_name`, `ix_refresh_tokens_token_hash`; `timestamp with time zone` for every `DateTimeOffset`.
+Delivered files (delete `Persistence/Migrations/.gitkeep`):
 
-Generated migration files are excluded from style fixes; if the build fails on analyzer warnings inside `Migrations/`, add to `.editorconfig`:
+- `src/CustomerSupportCrm.Infrastructure/Persistence/Migrations/20260930092037_InitialIdentity.cs` (225 lines)
+- `.../20260930092037_InitialIdentity.Designer.cs` (395 lines) and `.../ApplicationDbContextModelSnapshot.cs` (392 lines), generated.
 
-```ini
-[src/CustomerSupportCrm.Infrastructure/Persistence/Migrations/**.cs]
-generated_code = true
-dotnet_analyzer_diagnostic.severity = none
-```
+Story 01 content of `InitialIdentity.cs`: `roles` (lines 35–53), `users` (55–76), `role_permissions` (78–94), `refresh_tokens` (96–123), `user_roles` (125–147); indexes `ix_refresh_tokens_session_id`, `ix_refresh_tokens_token_hash` (unique), `ix_refresh_tokens_user_id`, `ix_roles_normalized_name` (unique), `ix_user_roles_role_id`, `ix_users_email` (unique) (lines 169–200); `Down` drops at 209–222. Every `DateTimeOffset` is `timestamp with time zone`; `users`, `roles`, `refresh_tokens` carry `xmin xid` row versions. **The same migration also creates `audit_logs` from Story 06** (lines 14–33, indexes 149–167, drop 206–207).
 
-### 14 — Docs
+File: `.editorconfig` — lines 398–406: `CA1716` off (the `Domain.Shared` namespace), `CA1711` off (`RolePermission`), and `[**/Migrations/*.cs]` as `generated_code = true` with `dotnet_analyzer_diagnostic.severity = none`. The `[tests/**/*.cs]` block (lines 408–410) is test work, not this story.
 
-File: `docs/development.md` — add a **"Seed identity data"** section after "Migrations":
+### 12 — Docs
 
-```bash
-dotnet user-secrets --project src/CustomerSupportCrm.Api set "Identity:BootstrapAdmin:Email" "admin@example.com"
-dotnet user-secrets --project src/CustomerSupportCrm.Api set "Identity:BootstrapAdmin:Password" "<min 10 chars>"
-dotnet run --project src/CustomerSupportCrm.Api -- seed
-```
-
-State that seeding is idempotent and only creates the admin when no users exist.
+- `docs/development.md` — Development migrates and seeds at startup from `Bootstrap:*` (line 16; its sign-in sentences are Story 02); "Outside Development" `dotnet CustomerSupportCrm.Api.dll --init-database` (lines 51–55).
+- `docs/architecture.md` — abstractions rows `IApplicationDbContext`, `IPasswordHasher`, `TimeProvider` (lines 73, 76, 79); Persistence bullets for strongly typed ids, `xmin`, `AuditableEntityInterceptor`, migrations, `DatabaseInitializer` (lines 85–89); configuration rows `DatabaseOptions.InitializeOnStartup` and `Bootstrap` (lines 98, 102); `TimeProvider` decision reworded (line 111).
+- `docs/security.md` — `Bootstrap:AdminEmail` / `AdminPassword` secrets row (line 81) and the `--init-database` release step (line 86). The "Passwords" section is owned by Story 02.
 
 ---
 
 ## Edge Cases & Failure Modes
 
-- **Email casing / whitespace** (`" Admin@X.com "`) — `User.Create` trims; uniqueness enforced on `NormalizedEmail` via the unique index (task 7). Duplicate insert surfaces as `DbUpdateException`; P2-04 maps it to `EMAIL_ALREADY_EXISTS`.
-- **Unknown permission code** — `Role.SetPermissions` throws `DomainException(UNKNOWN_PERMISSION)` (task 5) → 422 through the existing `GlobalExceptionHandler`.
-- **Renaming a system role** — throws `SYSTEM_ROLE_READ_ONLY` (task 5).
-- **Lockout arithmetic** — `RecordFailedLogin` with `maxAttempts = 5`: 5th failure locks and resets the counter; `IsLockedOut(now)` false once `now >= LockoutEndsAt` (task 4).
-- **Seed run twice** — roles found by `NormalizedName`, users exist → nothing created (task 9 steps 1–3).
-- **Seed with empty config** — warning logged, no user, exit code 0 (task 9 step 4).
-- **Seed with short password** — `InvalidOperationException`, non-zero exit (task 9 step 5).
-- **Seed before migration** — `relation "roles" does not exist` from Npgsql; fix by running `dotnet ef database update` first (documented in task 14).
-- **API/Integration test hosts** — no DB access at startup because seeding only runs with the `seed` argument (task 11). Health endpoints and existing tests keep working.
-- **Concurrent password change** — `SecurityStamp` is a concurrency token (task 7); conflicting updates raise `DbUpdateConcurrencyException` (handled by callers in later stories).
-- **Long user agent** — truncated to 512 chars in `RefreshToken.Issue` (task 6) instead of failing the insert.
+- **Email casing / whitespace** (`" Admin@X.com "`) — `EmailAddress.Create` trims and lower-cases; uniqueness is the unique index on `users.email` (`UserConfiguration.cs` line 18). Duplicates surface as `DbUpdateException`; Story 04 checks first and returns `EMAIL_TAKEN`.
+- **Malformed email** — `DomainException(INVALID_EMAIL_ADDRESS)` → 422 through the Phase 1 `GlobalExceptionHandler`.
+- **Unknown permission code** — `Role.ReplacePermissions` throws `UNKNOWN_PERMISSION` (`Role.cs` line 117).
+- **Changing or deleting a system role** — `ROLE_IS_SYSTEM` (`Role.cs` line 131). Manager and Agent are ordinary roles and can be edited or deleted.
+- **Lockout arithmetic** — 5th consecutive failure sets `LockoutEndsAt = now + 15 min` and resets the counter; `IsLockedOut(now)` is false once `now >= LockoutEndsAt` (`User.cs` lines 108–119).
+- **Catalog grows** — the next initializer run calls `GrantAllPermissions()`, so the Administrator gets new codes; Manager/Agent are never touched after the first run.
+- **Initializer run twice** — Administrator found by `NormalizedName`, defaults skipped (`firstRun` false), users exist → nothing new.
+- **Empty `Bootstrap` config** — warning logged, no user created, startup continues.
+- **Invalid `Bootstrap:AdminEmail`** — `EmailAddress.Create` throws `DomainException`; `--init-database` exits non-zero.
+- **Initializer before database exists** — `MigrateAsync` runs first, so there is no "relation does not exist" case; an unreachable server fails startup when `InitializeOnStartup` is true.
+- **API test host** — Development would migrate on startup; `ApiFactory` forces `InitializeOnStartup=false` so the unreachable DB is never touched.
+- **Concurrent edits** — `xmin` makes the losing `SaveChanges` throw `DbUpdateConcurrencyException` (mapped to 409 `CONFLICT` by later stories).
+- **Long user agent / IP** — truncated in `RefreshToken` (lines 38–39, 106–107) instead of failing the insert.
+- **Child-only change** (only role permissions changed) — `UpdatedAt/By` still stamped (`AuditableEntityInterceptor.cs` line 42).
 
 ---
 
 ## Test Plan
 
-Test projects are **out of scope** for this story (`tests/` must not be modified). No tests are added, changed or removed. Existing suites must stay green:
+Tests are out of scope under the standing directive: **no tests are added, changed or removed**. The existing tests in `0f87e2d` that cover this story are read-only references:
 
-1. `CustomerSupportCrm.Application.Tests` — unchanged, must pass.
-2. `CustomerSupportCrm.Api.Tests` — unchanged, must pass (proves no DB access at startup).
-3. Domain and seeder behaviour is verified manually through the Verification Steps below; automated tests for `User`, `Role`, `RefreshToken` and `IdentitySeeder` are deferred to a dedicated testing story.
+1. `tests/CustomerSupportCrm.Domain.Tests/Users/UserTests.cs` (unit): `CreateNormalizesEmailAndStartsActive`, `CreateRejectsBlankDisplayName`, `LocksOutAfterMaxFailedAttempts`, `SuccessfulLoginResetsFailuresAndRecordsTime`, `EnableClearsLockout`, `SetRolesReplacesMembershipWithoutDuplicates`.
+2. `tests/CustomerSupportCrm.Domain.Tests/Users/RefreshTokenTests.cs` (unit): `IssuedTokenIsActiveUntilExpiry`, `RotateSpendsTokenAndKeepsSession`, `SpentTokenCannotRotateAgain`, `RevokeKeepsFirstReason`, `TruncatesLongUserAgent`.
+3. `tests/CustomerSupportCrm.Domain.Tests/Roles/RoleTests.cs` (unit): `CreateTrimsNameAndNormalizes`, `RejectsUnknownPermission`, `UpdateReplacesPermissions`, `AdministratorHoldsEveryPermission`, `SystemRoleCannotBeUpdatedOrDeleted`, `PermissionCatalogCodesAreUniqueAndGrouped`.
+4. `tests/CustomerSupportCrm.Domain.Tests/Shared/EmailAddressTests.cs` (unit): `NormalizesToTrimmedLowerCase`, `EqualByValue`, `RejectsMalformedAddresses`.
+5. `tests/CustomerSupportCrm.IntegrationTests/DatabaseTests.cs` (integration, PostgreSQL): `ReadinessIsHealthyWhenDatabaseIsReachable` (line 12), `MigrationsAreFullyApplied` (line 23), `SeedsSystemAndDefaultRoles` (line 32). The commit message says the integration suite had not yet been run.
 
 ---
 
 ## Migration / Rollback
 
-- **Apply:** `dotnet ef database update --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api`.
-- **Rollback:** `dotnet ef database update 0 --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api`, then `dotnet ef migrations remove ...` with the same flags.
-- **Half-applied state:** EF migrations run in a transaction on PostgreSQL; a failure leaves no partial tables. If `__EFMigrationsHistory` lists `AddIdentity` but tables are missing, drop the history row and re-apply.
+- **Apply:** `dotnet ef database update --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api`, or `dotnet CustomerSupportCrm.Api.dll --init-database` (also seeds). In Development the API migrates on startup.
+- **Rollback:** `dotnet ef database update 0 --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api`. This also drops `audit_logs` (shared migration); there is no identity-only rollback.
+- **Half-applied state:** EF migrations run in a transaction on PostgreSQL; a failure leaves no partial tables. If `__EFMigrationsHistory` lists `20260930092037_InitialIdentity` but tables are missing, delete that row and re-apply.
 
 ---
 
 ## Verification Steps
 
 1. **Backend builds:** from `customer-support-crm-api/` run `dotnet build` — zero warnings, zero errors.
-2. **Regression:** `dotnet test --filter "FullyQualifiedName!~IntegrationTests"` — all existing tests pass.
-3. **Migration:** `dotnet ef database update --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api` — succeeds; `\dt` in psql shows the five tables.
-4. **Seed (empty config):** `dotnet run --project src/CustomerSupportCrm.Api -- seed` — exits 0, logs the "not configured" warning, `roles` has 3 rows, `users` has 0.
-5. **Seed (configured):** set the two user-secrets from task 14, run the seed again — one user with the Administrator role; `role_permissions` for Administrator has 15 rows.
-6. **Idempotency:** run the seed a third time — row counts unchanged.
-7. **No secrets in logs:** search the console output of steps 4–6 for the password value and for `AQAAAA` (Identity hash prefix) — no matches.
-8. **Normal startup:** `dotnet run --project src/CustomerSupportCrm.Api --launch-profile https` — starts, `/health/ready` returns `Healthy`, no seeding log lines.
+2. **Regression:** `dotnet test --filter "FullyQualifiedName!~IntegrationTests"` — all tests pass (proves the API host does not touch the DB at startup).
+3. **Migration:** `dotnet ef database update --project src/CustomerSupportCrm.Infrastructure --startup-project src/CustomerSupportCrm.Api` — succeeds; `\dt` in psql shows `users`, `user_roles`, `roles`, `role_permissions`, `refresh_tokens` (and `audit_logs`).
+4. **Initialize (empty config):** with `Bootstrap:AdminEmail` / `AdminPassword` cleared (e.g. empty user-secrets or env vars), run `dotnet run --project src/CustomerSupportCrm.Api -- --init-database` — exits 0, logs the "no administrator was created" warning; `roles` has 3 rows, `users` has 0.
+5. **Initialize (configured):** set both `Bootstrap` values and run again — one user with the Administrator role; `role_permissions` for Administrator has 13 rows; Manager 9, Agent 6.
+6. **Idempotency:** run `--init-database` a third time — row counts unchanged.
+7. **No secrets in logs:** search the output of steps 4–6 for the password value and for `AQAAAA` (Identity hash prefix) — no matches.
+8. **Normal startup:** `dotnet run --project src/CustomerSupportCrm.Api --launch-profile https` — Development migrates/seeds, starts, and `/health/ready` returns `Healthy`.
 
 ---
 
 ## Done Criteria
 
-- [ ] `User`, `UserRole`, `Role`, `RolePermission`, `RefreshToken`, `Permissions`, `IdentityErrorCodes` exist under `src/CustomerSupportCrm.Domain/Users/` with no framework references.
-- [ ] `Permissions.All` contains the 15 codes; `IsDefined` works.
-- [ ] Five EF configurations exist with the listed tables, keys and unique indexes; DbSets added.
-- [ ] `AddIdentity` migration exists and applies cleanly.
-- [ ] `IPasswordHasher` + `IdentityPasswordHasher` registered; `TimeProvider.System` registered.
-- [ ] `dotnet run ... -- seed` is idempotent, creates 3 system roles and the admin only when configured and no users exist.
-- [ ] No password, hash or security stamp is logged.
-- [ ] Normal startup and existing tests do not touch the database.
-- [ ] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
-- [ ] `dotnet build` passes with zero warnings.
+- [x] Domain entities exist with no framework references (`CustomerSupportCrm.Domain.csproj` has no references). Deviation: `User`/`UserRole`/`RefreshToken` in `Domain/Users`, `Role`/`RolePermission`/`Permissions` in `Domain/Roles`, `EmailAddress` in `Domain/Shared`.
+- [x] Permission catalog is code-defined (13 codes, `Permissions.All`, `IsKnown`); the Administrator system role is seeded with `Permissions.All` and re-synced every run.
+- [x] EF configurations, DbSets, strongly typed id converters, `xmin` tokens and unique indexes (`users.email`, `roles.normalized_name`, `refresh_tokens.token_hash`) exist, plus indexes on `refresh_tokens(user_id)` and `(session_id)`.
+- [ ] Migration applies cleanly — delivered as `20260930092037_InitialIdentity` (not `AddIdentity`, and it also contains Story 06's `audit_logs`). `DatabaseTests.MigrationsAreFullyApplied` covers it, but the commit message says the integration suite had not been run, so a clean `dotnet ef database update` is not yet confirmed.
+- [x] Initializer is idempotent and skips admin creation when `Bootstrap` is empty (`DatabaseInitializer`, not `IdentitySeeder`; runs via `--init-database` or `InitializeOnStartup`).
+- [x] Password hash, token hash and security stamp are never logged (only the admin email is logged; there is no security stamp).
+- [x] `IPasswordHasher` + `IdentityPasswordHasher` and `TimeProvider.System` registered.
+- [x] Nothing changed in `docker-compose.yml`, `deploy/` or `.github/` by this story. (`0f87e2d` does change files under `tests/`; that is test work outside this story.)
+- [x] `dotnet build` passes with zero warnings.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to Story 02.**
