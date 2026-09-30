@@ -1,0 +1,18 @@
+# Managed by squad-kit — do not edit this block
+.squad/secrets.yaml
+.squad/stories/**/attachments/
+.squad/.trash/
+.squad/.last-run.json
+.squad/.last-copy-prompt.md
+.squad/runs/
+# End squad-kit block
+
+# Child repositories: each one is its own git repo with its own GitHub remote
+customer-support-crm-api/
+customer-support-crm-web/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
