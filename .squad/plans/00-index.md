@@ -4,4 +4,4 @@ One row per feature folder under `.squad/plans/`. `NN` continues as a global exe
 
 | Feature | Overview | NN range |
 |---------|----------|----------|
-| _add rows per feature_ |
+| [security-and-administration](security-and-administration/00-overview.md) | Phase 2 — Identity & Authorization (users, roles, permissions, JWT, audit) | 01–07 |
