@@ -1,6 +1,8 @@
 # Story 07 — Security hardening: rate limiting, CORS, secure headers, request limits (Story: P2-07)
 
 > As-built plan: written after implementation in `customer-support-crm-api` commit `0f87e2d`; paths and line numbers refer to that commit.
+>
+> **Follow-up:** the items `0f87e2d` left open (secure headers, HSTS, Server header, configurable body limit, CORS startup check, global rate limiter) were completed in commit `2956767`: `Api/Middleware/SecureHeadersMiddleware.cs`, `GlobalRateLimitOptions`, `RequestLimitOptions` and `AddApiRequestLimits` in `Api/Configuration/SecurityExtensions.cs`, and `Program.cs`. The CORS check exempts the `Test` environment so the integration host still starts.
 
 ## Prerequisites
 
@@ -230,9 +232,9 @@ curl -sk -i -X POST https://localhost:5001/api/v1/auth/login -H "Content-Type: a
 
 - [x] 11th login attempt within a minute from the same IP returns 429 `RATE_LIMITED` envelope with `Retry-After` (also refresh and change-password).
 - [x] CORS allows only configured origins; preflight from an unknown origin gets no CORS headers.
-- [ ] Secure headers present on API responses — **not implemented in `0f87e2d`**; Swagger UI works in Development (unchanged).
-- [ ] Server header removed; request body limit configurable — **not implemented in `0f87e2d`** (413 envelope exists from Phase 1).
-- [ ] Startup fails outside Development when `Cors:AllowedOrigins` is empty — **not implemented in `0f87e2d`** (empty list = all cross-origin requests refused).
+- [x] Secure headers present on API responses; Swagger UI works in Development — completed in `2956767` (`SecureHeadersMiddleware`).
+- [x] Server header removed; request body limit configurable — completed in `2956767` (`RequestLimits:MaxRequestBodyBytes`, default 25 MB).
+- [x] Startup fails outside Development when `Cors:AllowedOrigins` is empty — completed in `2956767` (`Test` environment exempt).
 - [x] Docs updated (`docs/architecture.md` pipeline + configuration table, `docs/security.md` CORS / sign-in protection).
 - [x] `dotnet build` passes with zero warnings.
 - [x] Nothing changed in `docker-compose.yml`, `deploy/`, `.github/` by this story; no test edits required by this plan.
