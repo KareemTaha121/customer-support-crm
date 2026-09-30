@@ -46,7 +46,8 @@ All 12 features are built on backend and frontend. Remaining work is optional po
 
 - The staff live chat transcript is read from the linked ticket (`GET /tickets/{id}/messages`), so it needs `tickets.view`. There is no staff chat-messages endpoint.
 - `ai.agent_assist_enabled` is not a public setting, so the AI panel only hides when it is explicitly "false". Otherwise the actions show `FEATURE_DISABLED`.
-- en/ar resx entries are missing for some newer backend error codes; the English fallback messages are used.
+- Error messages: every feature code has an Arabic resx entry. Codes with several/parameterized English messages (INVALID_TICKET, FILE_TOO_LARGE, ...) are Arabic-only in resx, so Arabic shows a generic message while English keeps the specific one. Generic field codes (REQUIRED, INVALID_LENGTH, ...) use FluentValidation's own localized messages.
+- Ticket details shows KB article suggestions (`GET /kb/suggestions`, match-any search on the subject) with insert-link for public articles.
 - Customer portal: CSAT allows "Change rating" (the backend accepts repeat feedback), and the contact form always sends `categoryId: null`.
 - KB: the article editor answers both `/knowledge-base/{id}` and `/knowledge-base/articles/{id}`. Count texts have no plural forms.
 - Tickets categories page shows the parent's English name in both languages.
