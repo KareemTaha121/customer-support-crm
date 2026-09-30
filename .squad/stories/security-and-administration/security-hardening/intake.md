@@ -14,7 +14,7 @@
 - **Tracker type:** `none`
 - **Work item id:** `P2-07`
 - **Work item type:** `Story`
-- **Status:** `Ready`
+- **Status:** `Done`
 - **Assignee:** ``
 - **Labels:** `phase-2`, `backend`, `security`
 

@@ -14,7 +14,7 @@
 - **Tracker type:** `none`
 - **Work item id:** `FE-04`
 - **Work item type:** `Story`
-- **Status:** `Ready`
+- **Status:** `Done`
 - **Assignee:** ``
 - **Labels:** `frontend`, `tickets`
 

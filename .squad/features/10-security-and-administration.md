@@ -2,7 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §10
 > **Implementation phase:** Phase 2 — Identity & Authorization (+ Phase 3 — Organization Context)
-> **Status:** Phase 2 in progress — see [Phase 2 delivery plan](#phase-2--identity--authorization-delivery-plan)
+> **Status:** Phase 2 done (backend + admin UI) — see [Phase 2 delivery plan](#phase-2--identity--authorization-delivery-plan)
 > **Build priority:** 2–3
 
 ## Summary
