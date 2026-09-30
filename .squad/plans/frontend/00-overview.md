@@ -8,16 +8,16 @@ Out of scope for every story: Docker, `deploy/`, CI/CD, unit and e2e tests. Veri
 |----|-----------|-----------|-------|-----------|--------|
 | 08 | FE-01 | [08-story-core-platform-shell.md](08-story-core-platform-shell.md) | Core platform shell | backend | Done |
 | 09 | FE-02 | [09-story-authentication-staff-and-portal.md](09-story-authentication-staff-and-portal.md) | Authentication (staff and portal) | 08 | Done |
-| 10 | FE-03 | 10-story-customers-ui.md | Customers UI (feature 01) | 08, 09 | Planned |
-| 11 | FE-04 | 11-story-tickets-ui.md | Tickets UI (feature 02) | 08, 09 | Planned |
-| 12 | FE-05 | 12-story-channels-and-live-chat-console.md | Channels and live chat console (feature 03) | 08, 09 | Planned |
-| 13 | FE-06 | 13-story-agent-dashboard-ui.md | Agent dashboard UI (feature 04) | 08, 09 | Planned |
-| 14 | FE-07 | 14-story-sla-and-automation-admin-ui.md | SLA and automation admin UI (feature 05) | 08, 09 | Planned |
-| 15 | FE-08 | 15-story-knowledge-base-ui.md | Knowledge base UI (feature 06) | 08, 09 | Planned |
-| 16 | FE-09 | 16-story-ai-assistant-panels.md | AI assistant panels (feature 07) | 08, 09, 11 | Planned |
-| 17 | FE-10 | 17-story-customer-portal-ui.md | Customer portal UI (feature 08) | 08, 09 | Planned |
-| 18 | FE-11 | 18-story-reports-ui.md | Reports UI (feature 09) | 08, 09 | Planned |
-| 19 | FE-12 | 19-story-administration-ui.md | Administration UI (features 10, 11, 12) | 08, 09 | Planned |
+| 10 | FE-03 | [10-story-customers-ui.md](10-story-customers-ui.md) | Customers UI (feature 01) | 08, 09 | Done |
+| 11 | FE-04 | [11-story-tickets-ui.md](11-story-tickets-ui.md) | Tickets UI (feature 02) | 08, 09 | Done |
+| 12 | FE-05 | [12-story-channels-and-live-chat-console.md](12-story-channels-and-live-chat-console.md) | Channels and live chat console (feature 03) | 08, 09 | Done |
+| 13 | FE-06 | [13-story-agent-dashboard-ui.md](13-story-agent-dashboard-ui.md) | Agent dashboard UI (feature 04) | 08, 09 | Done |
+| 14 | FE-07 | [14-story-sla-and-automation-admin-ui.md](14-story-sla-and-automation-admin-ui.md) | SLA and automation admin UI (feature 05) | 08, 09 | Done |
+| 15 | FE-08 | [15-story-knowledge-base-ui.md](15-story-knowledge-base-ui.md) | Knowledge base UI (feature 06) | 08, 09 | Done |
+| 16 | FE-09 | [16-story-ai-assistant-panels.md](16-story-ai-assistant-panels.md) | AI assistant panels (feature 07) | 08, 09, 11 | Done |
+| 17 | FE-10 | [17-story-customer-portal-ui.md](17-story-customer-portal-ui.md) | Customer portal UI (feature 08) | 08, 09 | Done |
+| 18 | FE-11 | [18-story-reports-ui.md](18-story-reports-ui.md) | Reports UI (feature 09) | 08, 09 | Done |
+| 19 | FE-12 | [19-story-administration-ui.md](19-story-administration-ui.md) | Administration UI (features 10, 11, 12) | 08, 09 | Done |
 
 Stories 10–19 are independent of each other (each owns its own folders), so they can be implemented in parallel.
 
