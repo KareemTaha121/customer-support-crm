@@ -44,12 +44,19 @@ All 12 features are built on backend and frontend. Remaining work is optional po
 
 ## Known gaps (low priority)
 
-- The staff live chat transcript is read from the linked ticket (`GET /tickets/{id}/messages`), so it needs `tickets.view`. There is no staff chat-messages endpoint.
-- `ai.agent_assist_enabled` is not a public setting, so the AI panel only hides when it is explicitly "false". Otherwise the actions show `FEATURE_DISABLED`.
-- Error messages: every feature code has an Arabic resx entry. Codes with several/parameterized English messages (INVALID_TICKET, FILE_TOO_LARGE, ...) are Arabic-only in resx, so Arabic shows a generic message while English keeps the specific one. Generic field codes (REQUIRED, INVALID_LENGTH, ...) use FluentValidation's own localized messages.
-- Ticket details shows KB article suggestions (`GET /kb/suggestions`, match-any search on the subject) with insert-link for public articles.
-- Customer portal: CSAT allows "Change rating" (the backend accepts repeat feedback), and the contact form always sends `categoryId: null`.
-- KB: the article editor answers both `/knowledge-base/{id}` and `/knowledge-base/articles/{id}`. Count texts have no plural forms.
-- Tickets categories page shows the parent's English name in both languages.
-- Admin integrations: scope/event label keys replace non-alphanumerics with `_`. Revoke, rotate, test and retry errors use the global snackbar.
-- Dashboard: unread notifications are a text line under the KPI grid, not a KPI card.
+- Customer portal: CSAT keeps a "Change rating" button (the backend accepts repeat feedback); the plan asked for read-only after rating.
+- Error messages: codes with several/parameterized English messages (INVALID_TICKET, FILE_TOO_LARGE, ...) are Arabic-only in resx, so Arabic shows a generic message while English keeps the specific one. FluentValidation field messages keep the English property name in Arabic ("'Category Name' لا يجب أن يكون فارغاً").
+- Admin integrations: scope/event label keys replace non-alphanumerics with `_` (`customers:read` → `admin.integrations.scopes.customers_read`).
+- A live chat's first visitor message is the ticket description, so it is not part of the transcript (`GET /chat/conversations/{id}/messages`).
+
+## Resolved in the third session
+
+- KB article suggestions on ticket details (`GET /kb/suggestions`, match-any search).
+- en/ar resx messages for every feature error code; feature-coded validation failures are localized.
+- Staff chat transcript endpoint `GET /chat/conversations/{id}/messages` (`chat.handle`, no `tickets.view`).
+- `GET /ai/status` honours `ai.agent_assist_enabled`, so the AI panel hides when agent assist is off.
+- Public `GET /public/web-forms/categories`; the portal contact form has a category picker.
+- Plural forms in `TranslationService` (`{ zero, one, two, few, many, other }` objects, `params.count`).
+- `/knowledge-base/articles/:id` is the canonical editor URL (`/knowledge-base/:id` redirects).
+- Ticket categories page shows the Arabic parent name; dashboard shows unread notifications as a KPI card; integration action errors use `admin.errors.*`.
+- Dev: `ng serve` proxies `/api` and `/hubs` (`proxy.conf.json`) so the SameSite=Strict refresh cookie survives reloads.
