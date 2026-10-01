@@ -2,7 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §4
 > **Implementation phase:** Phase 6 — Agent Workspace
-> **Status:** Done (backend + frontend) — backend plans [27](../plans/agent-dashboard/00-overview.md), frontend plan [13](../plans/frontend/13-story-agent-dashboard-ui.md)
+> **Status:** Done (backend + frontend) — backend plans [27, 38](../plans/agent-dashboard/00-overview.md), frontend plan [13](../plans/frontend/13-story-agent-dashboard-ui.md)
 > **Build priority:** 8
 
 ## Summary
