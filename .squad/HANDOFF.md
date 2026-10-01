@@ -14,7 +14,7 @@ Read this first in a new session. It replaces the old conversation.
 | Repo | Branch | State |
 |------|--------|-------|
 | `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–36, 36 intakes. Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
-| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed. `docs/endpoints.md` lists every endpoint |
+| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `d2563dc`, BUG-01 fix). `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed. `npx ng build`: 0 errors, 0 warnings |
 
 ## Frontend status (`customer-support-crm-web`)
@@ -48,9 +48,13 @@ Integration points verified: `/knowledge-base/articles/:id` route exists for the
 
 All 12 features are built on backend and frontend. Remaining work: the probable bugs below, then the spec gaps listed in each plan's deviations table (write a new intake per fix).
 
-## Probable backend bugs (found while writing plans 20–36, not fixed)
+## Backend bug stories (NN 37–45)
 
-- `StaffHub.JoinConversation` has no permission or scope check: any staff connection can follow any chat conversation by id (plan 33).
+Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). Next: BUG-02 (plan 38).
+
+## Probable backend bugs (found while writing plans 20–36)
+
+- ~~`StaffHub.JoinConversation` has no permission or scope check~~ — **fixed** in api `d2563dc` (BUG-01, plan 37).
 - `GET /tasks?ticketId=` / `?customerId=` skips the branch/department scope and returns every assignee's tasks; an unknown ticket/customer id on a task fails as 500 at the foreign key (plan 27).
 - `tickets.sla_policy_id` has no FK to `sla_policies`; deleting a policy leaves dangling ids, contrary to the handler comment (plan 28).
 - `PUT /portal/me` updates the customer name but returns the unchanged `CustomerAccount.DisplayName` (plan 30).

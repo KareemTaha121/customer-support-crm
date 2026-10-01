@@ -7,6 +7,7 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 |----|-----------|-----------|-------|-----------|--------|
 | 32 | CH-01 | [32-story-inbound-channels-and-outbound-messaging.md](32-story-inbound-channels-and-outbound-messaging.md) | Inbound channels (email / WhatsApp / SMS / web form) and outbound customer messaging | 20–21, 23–26 | Done |
 | 33 | CH-02 | [33-story-live-chat.md](33-story-live-chat.md) | Live chat (visitor API, agent handling, realtime, transcript) | 32, 20–21, 25–26 | Done |
+| 37 | BUG-01 | [37-story-staff-hub-conversation-access.md](37-story-staff-hub-conversation-access.md) | Staff hub: check permission and scope before joining a chat conversation | 33 | Done (`d2563dc`) |
 
 Story intakes: [`../../stories/communication-channels/`](../../stories/communication-channels/).
 Frontend counterpart: [../frontend/12-story-channels-and-live-chat-console.md](../frontend/12-story-channels-and-live-chat-console.md) (FE-05 — channel badges, live chat console, widget, public web form, channel admin).
@@ -27,7 +28,7 @@ Known gaps and drift:
 - **No IMAP polling, no WhatsApp templates, no provider delivery receipts.** Delivery status is outbox-level (`Pending`/`Sent`/`Failed`, `ProviderMessageId`), not on `TicketMessage`. WhatsApp free text only works inside the 24-hour customer-service window.
 - **Email inbound uses a shared secret header**, not a provider signature. Webhooks have no dedicated rate limiter.
 - **Unknown senders always become customers** (`auto-created` tag); there is no lead option or setting.
-- **`StaffHub.JoinConversation` has no permission/scope check** — any authenticated staff connection can subscribe to any conversation group whose id it knows (hub from `65c74a3`).
+- ~~**`StaffHub.JoinConversation` has no permission/scope check**~~ — fixed by story 37 (`d2563dc`) — any authenticated staff connection can subscribe to any conversation group whose id it knows (hub from `65c74a3`).
 - **`StartChatRequest.Language` is ignored.**
 - **Missing resx keys:** `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`.
 - **No automated tests** for channels or live chat in `tests/`.

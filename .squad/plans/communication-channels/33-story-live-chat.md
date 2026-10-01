@@ -106,7 +106,7 @@ Staff path when `currentUser.IsAuthenticated && VisitorToken is null` (scope che
 - **Two agents accept at once** — `xmin` token on `chat_conversations` → one gets 409 `CONFLICT`.
 - **Chat disabled** — `POST /public/chat/conversations` → 409 `FEATURE_DISABLED`; existing conversations keep working.
 - **Abuse** — visitor routes share the per-IP `public` limiter (30 / minute) → 429.
-- **Staff hub group join** — `StaffHub.JoinConversation` does not check `chat.handle` or scope; any staff connection can follow any conversation id it knows (see overview Known gaps).
+- **Staff hub group join** — `StaffHub.JoinConversation` did not check `chat.handle` or scope; fixed in [37-story-staff-hub-conversation-access.md](37-story-staff-hub-conversation-access.md) (`d2563dc`).
 - **Same email starts several chats** — each start creates a new ticket and conversation for the matched customer.
 
 ---
