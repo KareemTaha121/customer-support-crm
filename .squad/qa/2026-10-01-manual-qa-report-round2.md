@@ -54,7 +54,7 @@
 
 ## 3. 🆕 مشاكل جديدة
 
-> **تحديث:** تم إصلاح N2–N6 والتحقق منها في المتصفح والـ API (plans 58–62، انظر `plans/00-index.md` "QA round 2 fixes"). N1 ما زالت مفتوحة وتُحل مع plan 49.
+> **تحديث:** تم إصلاح N2–N6 والتحقق منها في المتصفح والـ API (plans 58–62، انظر `plans/00-index.md` "QA round 2 fixes"). N1 أُصلحت مع plan 49 (api `b94f982`، web `a28cb1b`): كود التحقق يظهر في الـ log في Development، وتحذير في Settings عند تفعيل التسجيل بدون إيميل.
 
 ### N1 🔴 عالية — التسجيل الذاتي في البوابة مستحيل محلياً (ومرتبط بـ H3)
 - **الخطوات:** `POST /public/portal/register` → 200 "a verification code has been sent" → `POST /public/portal/login` → `EMAIL_NOT_VERIFIED`.

@@ -48,9 +48,9 @@ Integration points verified: `/knowledge-base/articles/:id` route exists for the
 
 All 12 features are built on backend and frontend. Remaining work: the probable bugs below, then the spec gaps listed in each plan's deviations table (write a new intake per fix).
 
-**QA fixes (NN 47–57, BUG-11 to BUG-21):** a manual browser QA pass on 2026-10-01 ([report](qa/2026-10-01-manual-qa-report.md)) produced 11 planned fix stories, each with an intake and a plan. Run them in the wave order of [plans/qa-2026-10-01-fix-roadmap.md](plans/qa-2026-10-01-fix-roadmap.md), starting with 49 and then 47. Status is in `plans/00-index.md` ("QA fixes").
+**QA fixes (NN 47–57, BUG-11 to BUG-21):** a manual browser QA pass on 2026-10-01 ([report](qa/2026-10-01-manual-qa-report.md)) produced 11 planned fix stories, each with an intake and a plan. Run them in the wave order of [plans/qa-2026-10-01-fix-roadmap.md](plans/qa-2026-10-01-fix-roadmap.md). **49 is done** (api `b94f982`, web `a28cb1b`). In Development, emails now go to the API log (`Channels:Email:Provider = Log`). Next: **47**. Status is in `plans/00-index.md` ("QA fixes").
 
-**QA round 2 (NN 58–62, BUG-22 to BUG-26): done.** A second pass ([report](qa/2026-10-01-manual-qa-report-round2.md)) found N1–N6. N2–N6 are fixed and verified (api `91ec854`, `93d98b1`, `613e607`; web `48d8533`, `6652669`, `b91dd22`, `79460bd`). `CurrentUserResponse` now has `hasDataAccess`. N1 (portal sign-up blocked without email) is still open, under story 49.
+**QA round 2 (NN 58–62, BUG-22 to BUG-26): done.** A second pass ([report](qa/2026-10-01-manual-qa-report-round2.md)) found N1–N6. N2–N6 are fixed and verified (api `91ec854`, `93d98b1`, `613e607`; web `48d8533`, `6652669`, `b91dd22`, `79460bd`). `CurrentUserResponse` now has `hasDataAccess`. N1 was fixed with story 49.
 
 ## Backend bug stories (NN 37–46)
 

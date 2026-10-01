@@ -1,6 +1,6 @@
 # Story 49 — Show staff when a reply to the customer was not delivered (Bug: BUG-13)
 
-> Fix plan, not yet implemented. Paths and line numbers refer to customer-support-crm-api `dca992c` (`develop`) and customer-support-crm-web `06c817a` (`main`).
+> Implemented in `customer-support-crm-api` commit `b94f982` (`develop`) and `customer-support-crm-web` commit `a28cb1b` (`main`) on 2026-10-01. The plan was written against api `dca992c` / web `06c817a`; its line numbers refer to those commits. See *Implementation notes* at the end for additions.
 > Intake: [../../stories/communication-channels/outbound-delivery-visibility/intake.md](../../stories/communication-channels/outbound-delivery-visibility/intake.md)
 
 ## Prerequisites
@@ -308,14 +308,37 @@ Test projects are **out of scope**: `tests/` must not be modified, and no e2e te
 
 ## Done Criteria
 
-- [ ] Staff message lists and the reply response carry `delivery` on queued agent replies; portal and live chat lists never do.
-- [ ] `lastError` is visible only to `channels.manage` holders.
-- [ ] The conversation shows Queued / Sent / Not delivered chips in en and ar, with Retry for `channels.manage`.
-- [ ] A reply whose delivery channel is not configured shows a warning toast instead of "Reply sent.".
-- [ ] The Channels page shows the failed-message banner with "Show failed".
-- [ ] Retrying a sent message returns 409 `OUTBOUND_ALREADY_SENT`.
-- [ ] The `Log` email provider works only in Development and is off by default.
-- [ ] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
-- [ ] `dotnet build` passes with zero warnings; `ng build` passes with zero errors and zero warnings.
+- [x] Staff message lists and the reply response carry `delivery` on queued agent replies; portal and live chat lists never do.
+- [x] `lastError` is visible only to `channels.manage` holders.
+- [x] The conversation shows Queued / Sent / Not delivered chips in en and ar, with Retry for `channels.manage`.
+- [x] A reply whose delivery channel is not configured shows a warning toast instead of "Reply sent.".
+- [x] The Channels page shows the failed-message banner with "Show failed".
+- [x] Retrying a sent message returns 409 `OUTBOUND_ALREADY_SENT`.
+- [x] The `Log` email provider works only in Development and is off by default.
+- [x] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
+- [x] `dotnet build` passes with zero warnings; `ng build` passes with zero errors and zero warnings.
+
+## Implementation notes (2026-10-01)
+
+Built as planned. Additions:
+
+| Addition | Why |
+|---|---|
+| The conversation reloads once, 20 s after it shows a `Queued` chip on a configured channel (`effect` in `TicketConversationComponent`) | The dispatcher runs every 15 s. Without the reload the chip stays "Queued" until the agent refreshes the page |
+| `/admin/settings` warns on "Customer self-registration" when it is on and outgoing email is not configured (`AdministrationApi.emailConfigured()` → `GET /channels/status`, only for `channels.manage`; i18n `admin.settings.registrationNeedsEmail`) | QA round 2 finding **N1**: sign-up needs the emailed verification code |
+| The Log provider logs the full body, so portal verification codes appear in the API log in Development | N1 in dev: register → read the code from the log → verify → sign in now works |
+| The banner hides "Show failed" when the table is already filtered to Failed | Avoids a button that does nothing |
+| `channels.admin.failedBanner` uses plural forms (en `one`/`other`, ar `zero`…`other`) | Arabic count agreement |
+
+Verified at runtime (Chrome + API):
+- Log provider: a reply goes `Pending` → `Sent`, and the email appears in the log. `GET /channels/status` reports Email `configured: true`.
+- Retry: Retry on a failed reply shows a toast, then "Queued", then "Sent" after the automatic reload. Retrying a sent row returns 409 (en/ar).
+- Error visibility: an agent without `channels.manage` gets `lastError: null`. Portal message lists have `delivery: null`; internal notes have `delivery: null`.
+- Channels page: banner shows "4 outgoing messages could not be delivered.", and "Show failed" filters the table. In Arabic it reads "تعذّر إرسال 4 رسائل صادرة.".
+- Not configured: a temporary API instance ran with `Channels__Email__Provider=Smtp`.
+  - Reply: error toast "Reply saved, but the Email channel is not configured…".
+  - Chip: "Not delivered", with a tooltip naming the channel.
+  - The settings warning was shown.
+- N1: `POST /public/portal/register` → the code appears in the log → `/verify` → `/login` succeeds.
 
 **STOP HERE. Report to the user.**

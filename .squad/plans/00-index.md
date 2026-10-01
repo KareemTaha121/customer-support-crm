@@ -43,7 +43,7 @@ Found in the manual QA pass of 2026-10-01 ([report](../qa/2026-10-01-manual-qa-r
 |----|----|---------|--------|------|--------|
 | 47 | BUG-11 | security-and-administration | [password-reset](../stories/security-and-administration/password-reset/intake.md) | [47](security-and-administration/47-story-password-reset.md) | To do |
 | 48 | BUG-12 | ai-features | [hide-ai-when-unconfigured](../stories/ai-features/hide-ai-when-unconfigured/intake.md) | [48](ai-features/48-story-hide-ai-when-unconfigured.md) | To do |
-| 49 | BUG-13 | communication-channels | [outbound-delivery-visibility](../stories/communication-channels/outbound-delivery-visibility/intake.md) | [49](communication-channels/49-story-outbound-delivery-visibility.md) | To do |
+| 49 | BUG-13 | communication-channels | [outbound-delivery-visibility](../stories/communication-channels/outbound-delivery-visibility/intake.md) | [49](communication-channels/49-story-outbound-delivery-visibility.md) | Done (api `b94f982`, web `a28cb1b`; includes N1) |
 | 50 | BUG-14 | frontend | [composer-error-state-after-send](../stories/frontend/composer-error-state-after-send/intake.md) | [50](frontend/50-story-composer-error-state-after-send.md) | To do |
 | 51 | BUG-15 | ticket-management | [localized-category-names](../stories/ticket-management/localized-category-names/intake.md) | [51](ticket-management/51-story-localized-category-names.md) | To do |
 | 52 | BUG-16 | frontend | [rtl-bidi-isolation](../stories/frontend/rtl-bidi-isolation/intake.md) | [52](frontend/52-story-rtl-bidi-isolation-and-date-formats.md) | To do |
