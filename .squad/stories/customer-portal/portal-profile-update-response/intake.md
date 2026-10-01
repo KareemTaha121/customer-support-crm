@@ -14,7 +14,7 @@
 - **Tracker type:** `none`
 - **Work item id:** `BUG-04`
 - **Work item type:** `Bug`
-- **Status:** `To do`
+- **Status:** `Done`
 - **Assignee:** ``
 - **Labels:** `backend`, `bug`, `portal`
 

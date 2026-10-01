@@ -27,7 +27,7 @@ Found while writing plans 20–36. One intake per bug under the feature's `stori
 | 37 | BUG-01 | communication-channels | [staff-hub-conversation-access](../stories/communication-channels/staff-hub-conversation-access/intake.md) | [37](communication-channels/37-story-staff-hub-conversation-access.md) | Done (`d2563dc`) |
 | 38 | BUG-02 | agent-dashboard | [task-scope-and-reference-validation](../stories/agent-dashboard/task-scope-and-reference-validation/intake.md) | [38](agent-dashboard/38-story-task-scope-and-reference-validation.md) | Done (`7058b62`) |
 | 39 | BUG-03 | sla-and-automation | [ticket-sla-policy-foreign-key](../stories/sla-and-automation/ticket-sla-policy-foreign-key/intake.md) | [39](sla-and-automation/39-story-ticket-sla-policy-foreign-key.md) | Done (`3433f13`) |
-| 40 | BUG-04 | customer-portal | [portal-profile-update-response](../stories/customer-portal/portal-profile-update-response/intake.md) | — | To do |
+| 40 | BUG-04 | customer-portal | [portal-profile-update-response](../stories/customer-portal/portal-profile-update-response/intake.md) | [40](customer-portal/40-story-portal-profile-update-response.md) | Done (`1ad5302`) |
 | 41 | BUG-05 | customer-portal | [revoke-portal-sessions-on-access-revoke](../stories/customer-portal/revoke-portal-sessions-on-access-revoke/intake.md) | — | To do |
 | 42 | BUG-06 | platform | [inactive-organization-units](../stories/platform/inactive-organization-units/intake.md) | — | To do |
 | 43 | BUG-07 | ticket-management | [ticket-category-cycle-guard](../stories/ticket-management/ticket-category-cycle-guard/intake.md) | — | To do |
