@@ -61,7 +61,7 @@ None.
 
 ## Dependencies
 
-- **Blocked by / related ids:** none
+- **Blocked by / related ids:** BUG-09 (resx sweep)
 - **Depends on code areas or other stories:** found while writing the as-built plans 20–36 (see `.squad/HANDOFF.md`, "Probable backend bugs").
 
 ## Technical hints (optional)

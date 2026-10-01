@@ -28,8 +28,8 @@ Known gaps and drift:
 - **No IMAP polling, no WhatsApp templates, no provider delivery receipts.** Delivery status is outbox-level (`Pending`/`Sent`/`Failed`, `ProviderMessageId`), not on `TicketMessage`. WhatsApp free text only works inside the 24-hour customer-service window.
 - **Email inbound uses a shared secret header**, not a provider signature. Webhooks have no dedicated rate limiter.
 - **Unknown senders always become customers** (`auto-created` tag); there is no lead option or setting.
-- ~~**`StaffHub.JoinConversation` has no permission/scope check**~~ — fixed by story 37 (`d2563dc`) — any authenticated staff connection can subscribe to any conversation group whose id it knows (hub from `65c74a3`).
+- ~~**`StaffHub.JoinConversation` had no permission/scope check** (any staff connection could follow any conversation id, hub from `65c74a3`)~~ — fixed by story 37 (`d2563dc`).
 - **`StartChatRequest.Language` is ignored.**
-- **Missing resx keys:** `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`.
+- **Missing resx keys:** `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND` → BUG-09 ([intake](../../stories/platform/missing-error-messages/intake.md)).
 - **No automated tests** for channels or live chat in `tests/`.
 - `Channels:Email:InboundSecret` and `Channels:Sms:InboundWebhookUrl` are required for inbound email / SMS but are not listed in `appsettings.json`.

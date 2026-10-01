@@ -2,7 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §3
 > **Implementation phase:** Phase 10 — Communications
-> **Status:** Done (backend + frontend) — backend plans [32–33](../plans/communication-channels/00-overview.md), frontend plan [12](../plans/frontend/12-story-channels-and-live-chat-console.md)
+> **Status:** Done (backend + frontend) — backend plans [32–33, 37](../plans/communication-channels/00-overview.md), frontend plan [12](../plans/frontend/12-story-channels-and-live-chat-console.md)
 > **Build priority:** 13
 
 ## Summary

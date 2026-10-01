@@ -24,5 +24,5 @@ Known gaps and drift:
 - **Webhooks:** no circuit breaker; a manual retry after 8 failures gets exactly one more attempt; payloads include message bodies and customer email (PII); test and retry are not audited.
 - **Data Protection keys** live on the file system (`App_Data/keys`); losing them makes stored webhook secrets unreadable.
 - **Code layout:** admin endpoints are inline lambdas with domain validation, request/response records are in `IntegrationSlices.cs` rather than `Contracts`, and the audit action names are string literals, not `AuditActions` constants.
-- **`WEBHOOK_DELIVERY_NOT_FOUND`** is an inline literal with no resx entry.
+- **`WEBHOOK_DELIVERY_NOT_FOUND`** is an inline literal with no resx entry. → BUG-09 ([intake](../../stories/platform/missing-error-messages/intake.md))
 - **No tests** cover integrations.

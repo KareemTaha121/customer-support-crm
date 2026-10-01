@@ -27,8 +27,8 @@ Known gaps and drift (spec vs as built):
 - **Assigned agent name** is exposed in `PortalTicketResponse.AgentName` (no ids or routing data).
 - **CSAT is not one-per-ticket** — feedback is accepted while Resolved or Closed and a new submission overwrites the old one. The "survey" is the resolution email from Channels (`CustomerMessenger.QueueResolvedAsync`), not a dedicated survey entity.
 - **No dedicated deflection or portal KB endpoints** — the portal uses `/api/v1/public/kb/*` (story 29).
-- **Revoking portal access does not end sessions** — tokens (8 h, not refreshable) stay valid; accounts are not checked per request.
-- **`PUT /portal/me` returns the old name** — it updates `Customer.Name`, but the profile's `name` is read from `CustomerAccount.DisplayName`, which is not changed.
+- **Revoking portal access does not end sessions** — tokens (8 h, not refreshable) stay valid; accounts are not checked per request. → BUG-05 ([intake](../../stories/customer-portal/revoke-portal-sessions-on-access-revoke/intake.md))
+- **`PUT /portal/me` returns the old name** — it updates `Customer.Name`, but the profile's `name` is read from `CustomerAccount.DisplayName`, which is not changed. → BUG-04 ([intake](../../stories/customer-portal/portal-profile-update-response/intake.md))
 - **Portal change-password** only checks length 12–128 and does not reject reusing the current password.
 - **Branding per organization** is served by Platform (`/api/v1/public/branding`), not by these stories.
 - **No tests** cover the portal.

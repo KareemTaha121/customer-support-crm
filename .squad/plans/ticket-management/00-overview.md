@@ -27,9 +27,9 @@ Known gaps and drift (spec vs as built):
 - **No `tickets.close` / `tickets.reopen` permissions**; `POST /tickets/{id}/status` (incl. `"Reopen"`) needs `tickets.update`. A `tickets.delete` permission and soft delete were added.
 - **Assignment to agent only** (no team); department via `POST /tickets/{id}/transfer`.
 - **History is not complete**: no rows for subject/description/tag edits or messages.
-- **Priorities are a fixed enum** (Low/Medium/High/Urgent); no priority CRUD. **Categories have no delete** (`CATEGORY_IN_USE` declared but unused); category cycles beyond self-parenting are not detected.
+- **Priorities are a fixed enum** (Low/Medium/High/Urgent); no priority CRUD. **Categories have no delete** (`CATEGORY_IN_USE` declared but unused); category cycles beyond self-parenting are not detected (→ BUG-07, [intake](../../stories/ticket-management/ticket-category-cycle-guard/intake.md)).
 - **No dedicated attachment entity**; the shared `Attachment` table is used. Unlinked uploads are never cleaned up.
 - **Ticket number is global**, not per organization (single-tenant).
 - **Reopen does not recompute SLA** due dates or clear breach flags.
-- **English resx** lacks several domain codes (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`, …); English responses use the exception message.
+- **English resx** lacks several domain codes (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`, …); English responses use the exception message. → BUG-09 ([intake](../../stories/platform/missing-error-messages/intake.md))
 - **No tests** for tickets in `tests/`.

@@ -60,7 +60,7 @@ None.
 
 ## Dependencies
 
-- **Blocked by / related ids:** none
+- **Blocked by / related ids:** BUG-06, BUG-07, BUG-08 (they add `ORGANIZATION_UNIT_INACTIVE` / `CATEGORY_CYCLE`; run the sweep after them)
 - **Depends on code areas or other stories:** found while writing the as-built plans 20–36 (see `.squad/HANDOFF.md`, "Probable backend bugs").
 
 ## Technical hints (optional)

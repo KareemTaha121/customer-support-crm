@@ -29,6 +29,6 @@ Known gaps and drift (spec vs as built):
 - **No article ↔ ticket or article ↔ ticket-category links.** Suggestions search the ticket subject only (not description).
 - **No images or attachments** in articles (Markdown body only).
 - **Slices are in one file** (`KnowledgeBaseSlices.cs`), not the folder layout in the spec; FAQs are `Type = Faq` articles.
-- **Category cycles** — only direct self-parenting is rejected; the parent id is not checked for existence (FK error → 409 `CONFLICT`).
+- **Category cycles** — only direct self-parenting is rejected; the parent id is not checked for existence (FK error → 409 `CONFLICT`). → BUG-08 ([intake](../../stories/knowledge-base/knowledge-category-cycle-guard/intake.md))
 - **Docs:** `docs/endpoints.md` does not list `POST /kb/articles/{id}/restore`.
 - **No tests** cover the knowledge base.

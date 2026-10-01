@@ -58,7 +58,7 @@ None.
 
 ## Dependencies
 
-- **Blocked by / related ids:** none
+- **Blocked by / related ids:** BUG-07 (same `CATEGORY_CYCLE` code and parent-chain check for ticket categories), BUG-09 (resx sweep)
 - **Depends on code areas or other stories:** found while writing the as-built plans 20–36 (see `.squad/HANDOFF.md`, "Probable backend bugs").
 
 ## Technical hints (optional)
