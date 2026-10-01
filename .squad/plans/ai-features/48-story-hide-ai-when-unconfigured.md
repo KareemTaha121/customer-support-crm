@@ -1,6 +1,6 @@
 # Story 48 — Hide the AI chatbot and warn admins when no AI provider is configured (Bug: BUG-12)
 
-> Fix plan, not yet implemented. Paths and line numbers refer to customer-support-crm-api `dca992c` (`develop`) and customer-support-crm-web `06c817a` (`main`).
+> Implemented in `customer-support-crm-api` commit `6e89942` (`develop`) and `customer-support-crm-web` commit `05d6969` (`main`) on 2026-10-01. The plan was written against api `dca992c` / web `06c817a`; its line numbers refer to those commits. See *Implementation notes* at the end.
 > Intake: [../../stories/ai-features/hide-ai-when-unconfigured/intake.md](../../stories/ai-features/hide-ai-when-unconfigured/intake.md)
 
 ## Prerequisites
@@ -214,12 +214,29 @@ Test projects are **out of scope**: `tests/` must not be modified, and no e2e te
 
 ## Done Criteria
 
-- [ ] Without an AI provider, `GET /public/features` returns `chatbot.enabled` `"false"`; with a provider it follows the setting.
-- [ ] The portal hides the assistant nav item and shows the "not available" view without a provider.
-- [ ] A late `AI_NOT_CONFIGURED` / `FEATURE_DISABLED` switches the portal page to the "not available" view instead of showing server text.
-- [ ] `GET /settings/status` (`settings.manage`) reports `aiProviderConfigured`; `/admin/settings` warns on both AI rows in en and ar.
-- [ ] Saving settings reloads the public features instead of copying raw values.
-- [ ] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
-- [ ] `dotnet build` passes with zero warnings; `ng build` passes with zero errors and zero warnings.
+- [x] Without an AI provider, `GET /public/features` returns `chatbot.enabled` `"false"`; with a provider it follows the setting.
+- [x] The portal hides the assistant nav item and shows the "not available" view without a provider.
+- [x] A late `AI_NOT_CONFIGURED` / `FEATURE_DISABLED` switches the portal page to the "not available" view instead of showing server text.
+- [x] `GET /settings/status` (`settings.manage`) reports `aiProviderConfigured`; `/admin/settings` warns on both AI rows in en and ar.
+- [x] Saving settings reloads the public features instead of copying raw values.
+- [x] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
+- [x] `dotnet build` passes with zero warnings; `ng build` passes with zero errors and zero warnings.
+
+## Implementation notes (2026-10-01)
+
+Built as planned, with one extension:
+
+| Deviation | Why |
+|---|---|
+| `SettingsStatusResponse(bool AiProviderConfigured, bool EmailConfigured)`: the status also reports whether an Email sender is configured | Story 49 had added the "self-registration needs email" warning by calling `GET /channels/status`, which needs `channels.manage`. The page now uses this one `settings.manage` endpoint for both warnings, and `AdministrationApi.emailConfigured()` was removed |
+
+Verified at runtime (API plus the built-in browser):
+- Features: `GET /public/features` returns `chatbot.enabled: "false"` while the stored setting is `"true"`.
+- Status: `GET /settings/status` returns `{ aiProviderConfigured: false, emailConfigured: true }` for admin, and 403 for the Agent role.
+- Chatbot: `POST /public/chatbot/messages` returns 503 `AI_NOT_CONFIGURED`.
+- Portal: the nav has no "Virtual assistant", and `/portal/assistant` shows the unavailable view with its alternatives.
+- Stale flag: the cached flag was forced to `true` with the Angular debug API. Asking a question then switched the page to the unavailable view, and no server text was shown.
+- `/admin/settings`: the banner shows, plus "No AI provider" pills on Chatbot and AI agent assist. The email warning is hidden while the Log provider is on.
+- Save: saving a setting reloads the public features, and `chatbot.enabled` stays `"false"`.
 
 **STOP HERE. Report to the user.**
