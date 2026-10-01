@@ -54,7 +54,7 @@ Every feature has a backend plan, a frontend plan and story intakes. Plans live 
 | 05 | SLA & Automation | [28, 39](../plans/sla-and-automation/00-overview.md) | [14](../plans/frontend/14-story-sla-and-automation-admin-ui.md) | Done |
 | 06 | Knowledge Base | [29](../plans/knowledge-base/00-overview.md) | [15](../plans/frontend/15-story-knowledge-base-ui.md) | Done |
 | 07 | AI Features | [35](../plans/ai-features/00-overview.md) | [16](../plans/frontend/16-story-ai-assistant-panels.md) | Done |
-| 08 | Customer Portal | [30–31, 40](../plans/customer-portal/00-overview.md) | [17](../plans/frontend/17-story-customer-portal-ui.md) | Done |
+| 08 | Customer Portal | [30–31, 40–41](../plans/customer-portal/00-overview.md) | [17](../plans/frontend/17-story-customer-portal-ui.md) | Done |
 | 09 | Reports & Management | [34](../plans/reports-and-management/00-overview.md) | [18](../plans/frontend/18-story-reports-ui.md) | Done |
 | 10 | Security & Administration | [01–07, 22](../plans/security-and-administration/00-overview.md) | [09](../plans/frontend/09-story-authentication-staff-and-portal.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
 | 11 | Integrations | [36](../plans/integrations/00-overview.md) | [19](../plans/frontend/19-story-administration-ui.md) | Done |

@@ -2,7 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §8
 > **Implementation phase:** Phase 9 — Customer Portal
-> **Status:** Done (backend + frontend) — backend plans [30–31, 40](../plans/customer-portal/00-overview.md), frontend plan [17](../plans/frontend/17-story-customer-portal-ui.md)
+> **Status:** Done (backend + frontend) — backend plans [30–31, 40–41](../plans/customer-portal/00-overview.md), frontend plan [17](../plans/frontend/17-story-customer-portal-ui.md)
 > **Build priority:** 12
 
 ## Summary
