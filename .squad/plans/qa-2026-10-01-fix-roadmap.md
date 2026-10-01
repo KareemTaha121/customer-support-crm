@@ -27,7 +27,7 @@ Work one story at a time, in this order. Commit and push each repo after each st
 | Wave | Stories | Why this order |
 |------|---------|----------------|
 | 0 | Restart the API on `develop` HEAD and re-check H4 (43/44) | QA ran on a build from before the fix |
-| 1 | **49 ✅ → 47** | 47 sends reset links by email through the outbound pipeline; 49 adds the dev "log" email provider and delivery status that make 47 testable locally |
+| 1 | **49 ✅ → 47 ✅** | 47 sends reset links by email through the outbound pipeline; 49 adds the dev "log" email provider and delivery status that make 47 testable locally |
 | 2 | **48** | Small and independent; removes a customer-facing internal error |
 | 3 | **50, 56** | Frontend-only and low risk; 50 touches the composers that 53 also changes, so it goes first |
 | 4 | **53** | Live chat transcript (after 50 to avoid conflicts in `chat-console.page.ts` / `portal-chat.page.ts`) |
