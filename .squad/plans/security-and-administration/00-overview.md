@@ -13,6 +13,8 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 | 06 | P2-06 | [06-story-audit-logging.md](06-story-audit-logging.md) | Audit logging | 01–05 | Done |
 | 07 | P2-07 | [07-story-security-hardening.md](07-story-security-hardening.md) | Security hardening | 02, 03 | Done |
 | 22 | P3-01 | [22-story-system-settings-and-audit-export.md](22-story-system-settings-and-audit-export.md) | System settings and audit log export (Phase 3) | 03, 06, platform 21 | Done |
+| 47 | BUG-11 | [47-story-password-reset.md](47-story-password-reset.md) | Staff and portal password reset by email (QA H1) | 49, 03, 06 | To do |
+| 54 | BUG-18 | [54-story-readable-audit-log.md](54-story-readable-audit-log.md) | Readable audit log: entity labels, translated actions and entity types (QA M5) | 06, 22, 47 | To do |
 
 Plans are generated one at a time, after the previous story is implemented, so each plan cites the real code the earlier stories produced.
 

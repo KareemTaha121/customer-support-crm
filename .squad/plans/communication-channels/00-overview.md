@@ -8,6 +8,8 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 | 32 | CH-01 | [32-story-inbound-channels-and-outbound-messaging.md](32-story-inbound-channels-and-outbound-messaging.md) | Inbound channels (email / WhatsApp / SMS / web form) and outbound customer messaging | 20–21, 23–26 | Done |
 | 33 | CH-02 | [33-story-live-chat.md](33-story-live-chat.md) | Live chat (visitor API, agent handling, realtime, transcript) | 32, 20–21, 25–26 | Done |
 | 37 | BUG-01 | [37-story-staff-hub-conversation-access.md](37-story-staff-hub-conversation-access.md) | Staff hub: check permission and scope before joining a chat conversation | 33 | Done (`d2563dc`) |
+| 49 | BUG-13 | [49-story-outbound-delivery-visibility.md](49-story-outbound-delivery-visibility.md) | Show staff when a customer reply was not delivered; dev Log email provider (QA H3) | 32 | To do |
+| 53 | BUG-17 | [53-story-live-chat-opening-message.md](53-story-live-chat-opening-message.md) | Show the visitor's opening message in both live chat transcripts (QA M4) | 33, 50 | To do |
 
 Story intakes: [`../../stories/communication-channels/`](../../stories/communication-channels/).
 Frontend counterpart: [../frontend/12-story-channels-and-live-chat-console.md](../frontend/12-story-channels-and-live-chat-console.md) (FE-05 — channel badges, live chat console, widget, public web form, channel admin).

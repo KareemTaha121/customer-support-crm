@@ -8,6 +8,7 @@ Matching frontend plan: [../frontend/14-story-sla-and-automation-admin-ui.md](..
 |----|-----------|-----------|-------|-----------|--------|
 | 28 | SL-01 | [28-story-sla-policies-and-automation-engine.md](28-story-sla-policies-and-automation-engine.md) | SLA policies, assignment rules, escalation rules and the SLA evaluation job | Ticket Management 25–26 | Done |
 | 39 | BUG-03 | [39-story-ticket-sla-policy-foreign-key.md](39-story-ticket-sla-policy-foreign-key.md) | Clear ticket SLA policy references when a policy is deleted | 28 | Done (`3433f13`) |
+| 55 | BUG-19 | [55-story-sla-deadline-display.md](55-story-sla-deadline-display.md) | Show the deadline that drives the SLA state; count breached apart from at risk; clear stale warnings (QA L1) | 28, 27, 34 | To do |
 
 The plan is an **as-built** plan written after implementation, from the real code.
 

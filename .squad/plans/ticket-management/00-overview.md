@@ -9,6 +9,7 @@ Matching frontend plan: [../frontend/11-story-tickets-ui.md](../frontend/11-stor
 | 25 | TK-01 | [25-story-ticket-lifecycle.md](25-story-ticket-lifecycle.md) | Ticket lifecycle: create, update, list, assign, status, escalate, history | Phase 2, Phase 3, feature 01 | Done |
 | 26 | TK-02 | [26-story-ticket-conversation-and-categories.md](26-story-ticket-conversation-and-categories.md) | Ticket conversation, attachments, categories and event handlers | 25 | Done |
 | 43 | BUG-07 | [43-story-ticket-category-cycle-guard.md](43-story-ticket-category-cycle-guard.md) | Prevent cycles in ticket category parents | 26 | Done (`cedce62`) |
+| 51 | BUG-15 | [51-story-localized-category-names.md](51-story-localized-category-names.md) | Arabic ticket category names everywhere a category is shown (QA M2) | 26, 34 | To do |
 
 Both plans are **as-built** plans written after implementation, from the real code. Their paths and line numbers refer to `develop` HEAD `2956767`.
 

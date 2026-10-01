@@ -10,6 +10,7 @@ Frontend counterpart: [../frontend/08-story-core-platform-shell.md](../frontend/
 | 21 | PL-02 | [21-story-organization-context-and-notifications.md](21-story-organization-context-and-notifications.md) | Organization context, branding and notifications | 20, Phase 2 (01–07) | Done |
 | 42 | BUG-06 | [42-story-inactive-organization-units.md](42-story-inactive-organization-units.md) | Reject assignment to inactive branches and departments | 21 | Done (`487e078`) |
 | 45 | BUG-09 | [45-story-missing-error-messages.md](45-story-missing-error-messages.md) | Add missing en/ar resx messages for error codes | 20, 42–44 | Done (`5eb50e6`) |
+| 57 | BUG-21 | [57-story-validation-message-quality.md](57-story-validation-message-quality.md) | Specific, localized validation messages, inline on the customer and ticket forms (QA L3, L4, L7, L8) | 45, 48 | To do |
 
 Both plans are **as-built**: they were written after the code shipped and list where the code differs from the intake.
 

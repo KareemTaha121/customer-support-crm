@@ -6,6 +6,7 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 | NN | Tracker id | Plan file | Title | Depends on | Status |
 |----|-----------|-----------|-------|-----------|--------|
 | 35 | AI-01 | [35-story-ai-assistant-and-chatbot.md](35-story-ai-assistant-and-chatbot.md) | AI assistant (summary, reply, categorization, solutions) and KB chatbot | Tickets (02), KB (06), Settings (12) | Done |
+| 48 | BUG-12 | [48-story-hide-ai-when-unconfigured.md](48-story-hide-ai-when-unconfigured.md) | Hide the chatbot and warn admins when no AI provider is configured (QA H2) | 35 | To do |
 
 Intake: [../../stories/ai-features/ai-assistant-and-chatbot/intake.md](../../stories/ai-features/ai-assistant-and-chatbot/intake.md).
 

@@ -35,6 +35,24 @@ Found while writing plans 20–36 (BUG-10 while fixing BUG-04). One intake per b
 | 45 | BUG-09 | platform | [missing-error-messages](../stories/platform/missing-error-messages/intake.md) | [45](platform/45-story-missing-error-messages.md) | Done (`5eb50e6`) |
 | 46 | BUG-10 | customer-management | [staff-rename-portal-account-sync](../stories/customer-management/staff-rename-portal-account-sync/intake.md) | [46](customer-management/46-story-staff-rename-portal-account-sync.md) | Done (`dca992c`) |
 
+## QA fixes (47–57)
+
+Found in the manual QA pass of 2026-10-01 ([report](../qa/2026-10-01-manual-qa-report.md)). Order, dependencies and the finding → story map: [qa-2026-10-01-fix-roadmap.md](qa-2026-10-01-fix-roadmap.md). Finding H4 (category cycles) was already fixed by plans 43–44.
+
+| NN | Id | Feature | Intake | Plan | Status |
+|----|----|---------|--------|------|--------|
+| 47 | BUG-11 | security-and-administration | [password-reset](../stories/security-and-administration/password-reset/intake.md) | [47](security-and-administration/47-story-password-reset.md) | To do |
+| 48 | BUG-12 | ai-features | [hide-ai-when-unconfigured](../stories/ai-features/hide-ai-when-unconfigured/intake.md) | [48](ai-features/48-story-hide-ai-when-unconfigured.md) | To do |
+| 49 | BUG-13 | communication-channels | [outbound-delivery-visibility](../stories/communication-channels/outbound-delivery-visibility/intake.md) | [49](communication-channels/49-story-outbound-delivery-visibility.md) | To do |
+| 50 | BUG-14 | frontend | [composer-error-state-after-send](../stories/frontend/composer-error-state-after-send/intake.md) | [50](frontend/50-story-composer-error-state-after-send.md) | To do |
+| 51 | BUG-15 | ticket-management | [localized-category-names](../stories/ticket-management/localized-category-names/intake.md) | [51](ticket-management/51-story-localized-category-names.md) | To do |
+| 52 | BUG-16 | frontend | [rtl-bidi-isolation](../stories/frontend/rtl-bidi-isolation/intake.md) | [52](frontend/52-story-rtl-bidi-isolation-and-date-formats.md) | To do |
+| 53 | BUG-17 | communication-channels | [live-chat-opening-message](../stories/communication-channels/live-chat-opening-message/intake.md) | [53](communication-channels/53-story-live-chat-opening-message.md) | To do |
+| 54 | BUG-18 | security-and-administration | [readable-audit-log](../stories/security-and-administration/readable-audit-log/intake.md) | [54](security-and-administration/54-story-readable-audit-log.md) | To do |
+| 55 | BUG-19 | sla-and-automation | [sla-deadline-display](../stories/sla-and-automation/sla-deadline-display/intake.md) | [55](sla-and-automation/55-story-sla-deadline-display.md) | To do |
+| 56 | BUG-20 | frontend | [ui-polish-qa-batch](../stories/frontend/ui-polish-qa-batch/intake.md) | [56](frontend/56-story-ui-polish-qa-batch.md) | To do |
+| 57 | BUG-21 | platform | [validation-message-quality](../stories/platform/validation-message-quality/intake.md) | [57](platform/57-story-validation-message-quality.md) | To do |
+
 Backend plans 20–36 are **as-built**: the code was implemented on `customer-support-crm-api` `develop` (commits `c3c7815`, `65c74a3`…`678ea67` and follow-ups) before the plans were written. Each plan cites the commit its line numbers refer to and lists where the code differs from the feature spec.
 
 Feature → plan coverage (backend + frontend) is in [../features/README.md](../features/README.md#plans-and-stories).
