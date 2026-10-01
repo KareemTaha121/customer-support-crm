@@ -52,7 +52,7 @@ Every feature has a backend plan, a frontend plan and story intakes. Plans live 
 | 03 | Communication Channels | [32–33, 37](../plans/communication-channels/00-overview.md) | [12](../plans/frontend/12-story-channels-and-live-chat-console.md) | Done |
 | 04 | Agent Dashboard | [27, 38](../plans/agent-dashboard/00-overview.md) | [13](../plans/frontend/13-story-agent-dashboard-ui.md) | Done |
 | 05 | SLA & Automation | [28, 39](../plans/sla-and-automation/00-overview.md) | [14](../plans/frontend/14-story-sla-and-automation-admin-ui.md) | Done |
-| 06 | Knowledge Base | [29](../plans/knowledge-base/00-overview.md) | [15](../plans/frontend/15-story-knowledge-base-ui.md) | Done |
+| 06 | Knowledge Base | [29, 44](../plans/knowledge-base/00-overview.md) | [15](../plans/frontend/15-story-knowledge-base-ui.md) | Done |
 | 07 | AI Features | [35](../plans/ai-features/00-overview.md) | [16](../plans/frontend/16-story-ai-assistant-panels.md) | Done |
 | 08 | Customer Portal | [30–31, 40–41](../plans/customer-portal/00-overview.md) | [17](../plans/frontend/17-story-customer-portal-ui.md) | Done |
 | 09 | Reports & Management | [34](../plans/reports-and-management/00-overview.md) | [18](../plans/frontend/18-story-reports-ui.md) | Done |

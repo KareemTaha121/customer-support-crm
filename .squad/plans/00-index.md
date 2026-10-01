@@ -31,7 +31,7 @@ Found while writing plans 20–36. One intake per bug under the feature's `stori
 | 41 | BUG-05 | customer-portal | [revoke-portal-sessions-on-access-revoke](../stories/customer-portal/revoke-portal-sessions-on-access-revoke/intake.md) | [41](customer-portal/41-story-revoke-portal-sessions-on-access-revoke.md) | Done (`31d6d5a`, `6587e7d`) |
 | 42 | BUG-06 | platform | [inactive-organization-units](../stories/platform/inactive-organization-units/intake.md) | [42](platform/42-story-inactive-organization-units.md) | Done (`487e078`) |
 | 43 | BUG-07 | ticket-management | [ticket-category-cycle-guard](../stories/ticket-management/ticket-category-cycle-guard/intake.md) | [43](ticket-management/43-story-ticket-category-cycle-guard.md) | Done (`cedce62`) |
-| 44 | BUG-08 | knowledge-base | [knowledge-category-cycle-guard](../stories/knowledge-base/knowledge-category-cycle-guard/intake.md) | — | To do |
+| 44 | BUG-08 | knowledge-base | [knowledge-category-cycle-guard](../stories/knowledge-base/knowledge-category-cycle-guard/intake.md) | [44](knowledge-base/44-story-knowledge-category-cycle-guard.md) | Done (api `e6bf4d7`, web `06c817a`) |
 | 45 | BUG-09 | platform | [missing-error-messages](../stories/platform/missing-error-messages/intake.md) | — | To do |
 
 Backend plans 20–36 are **as-built**: the code was implemented on `customer-support-crm-api` `develop` (commits `c3c7815`, `65c74a3`…`678ea67` and follow-ups) before the plans were written. Each plan cites the commit its line numbers refer to and lists where the code differs from the feature spec.
