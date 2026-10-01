@@ -70,9 +70,9 @@ Work one story at a time, in this order. Commit and push each repo after each st
 - New user-visible text needs both `en` and `ar` keys (frontend i18n) or resx entries (backend).
 - Conventional commits with the `Co-Authored-By` trailer.
 
-## Round 2 findings (not planned yet)
+## Round 2 findings
 
-[../qa/2026-10-01-manual-qa-report-round2.md](../qa/2026-10-01-manual-qa-report-round2.md) re-verified 43–46 and found six new issues, N1–N6. N1 (portal self-registration blocked when email is unconfigured) belongs in **49**. N2–N6 need new intakes (BUG-22+):
+[../qa/2026-10-01-manual-qa-report-round2.md](../qa/2026-10-01-manual-qa-report-round2.md) re-verified 43–46 and found six new issues, N1–N6. N1 (portal self-registration blocked when email is unconfigured) belongs in **49**. N2–N6 were fixed straight away as stories **58–62** (BUG-22 to BUG-26, as-built, see [00-index.md](00-index.md) "QA round 2 fixes"):
 
 - N2: the quick reply picker never receives `[ticketId]`.
 - N3: no warning for an Agent without a branch scope.

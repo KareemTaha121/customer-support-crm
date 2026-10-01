@@ -7,6 +7,7 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 |----|-----------|-----------|-------|-----------|--------|
 | 29 | KB-01 | [29-story-knowledge-base-articles-and-search.md](29-story-knowledge-base-articles-and-search.md) | Knowledge base articles, categories, search and public help center | Security & Administration 01–07, Ticket Management (02) | Done |
 | 44 | BUG-08 | [44-story-knowledge-category-cycle-guard.md](44-story-knowledge-category-cycle-guard.md) | Validate knowledge base category parents | 29, 43 | Done (api `e6bf4d7`, web `06c817a`) |
+| 60 | BUG-24 | [60-story-article-feedback-limit.md](60-story-article-feedback-limit.md) | Limit article votes per visitor and article; no votes on internal articles (QA round 2, N4) | 29 | Done (api `93d98b1`, web `79460bd`) |
 
 Story intake: [../../stories/knowledge-base/knowledge-base-articles-and-search/intake.md](../../stories/knowledge-base/knowledge-base-articles-and-search/intake.md).
 

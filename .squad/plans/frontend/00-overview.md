@@ -21,6 +21,8 @@ Out of scope for every story: Docker, `deploy/`, CI/CD, unit and e2e tests. Veri
 | 50 | BUG-14 | [50-story-composer-error-state-after-send.md](50-story-composer-error-state-after-send.md) | Composers do not show "This field is required." after a send (QA M1) | 12, 17 | To do |
 | 52 | BUG-16 | [52-story-rtl-bidi-isolation-and-date-formats.md](52-story-rtl-bidi-isolation-and-date-formats.md) | RTL bidi isolation, one date format rule, Material datepicker (QA M3, L5) | 51 | To do |
 | 56 | BUG-20 | [56-story-ui-polish-qa-batch.md](56-story-ui-polish-qa-batch.md) | UI polish batch: portal nav scrollbar, duplicate Agent label, form gaps, page title (QA L2, L6) | 08 | To do |
+| 58 | BUG-22 | [58-story-quick-reply-ticket-context.md](58-story-quick-reply-ticket-context.md) | Quick replies fill customer and ticket placeholders (QA round 2, N2) | 13, 11, 12 | Done (`48d8533`) |
+| 62 | BUG-26 | [62-story-task-past-date-warning.md](62-story-task-past-date-warning.md) | Warn when a task due date or reminder is already past (QA round 2, N6) | 13 | Done (`b91dd22`) |
 
 Stories 10–19 are independent of each other (each owns its own folders), so they can be implemented in parallel.
 

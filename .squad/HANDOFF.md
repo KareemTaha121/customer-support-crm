@@ -50,6 +50,8 @@ All 12 features are built on backend and frontend. Remaining work: the probable 
 
 **QA fixes (NN 47–57, BUG-11 to BUG-21):** a manual browser QA pass on 2026-10-01 ([report](qa/2026-10-01-manual-qa-report.md)) produced 11 planned fix stories, each with an intake and a plan. Run them in the wave order of [plans/qa-2026-10-01-fix-roadmap.md](plans/qa-2026-10-01-fix-roadmap.md), starting with 49 and then 47. Status is in `plans/00-index.md` ("QA fixes").
 
+**QA round 2 (NN 58–62, BUG-22 to BUG-26): done.** A second pass ([report](qa/2026-10-01-manual-qa-report-round2.md)) found N1–N6. N2–N6 are fixed and verified (api `91ec854`, `93d98b1`, `613e607`; web `48d8533`, `6652669`, `b91dd22`, `79460bd`). `CurrentUserResponse` now has `hasDataAccess`. N1 (portal sign-up blocked without email) is still open, under story 49.
+
 ## Backend bug stories (NN 37–46)
 
 Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All ten are done (plans 37–46).

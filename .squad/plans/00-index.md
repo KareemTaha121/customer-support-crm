@@ -53,6 +53,18 @@ Found in the manual QA pass of 2026-10-01 ([report](../qa/2026-10-01-manual-qa-r
 | 56 | BUG-20 | frontend | [ui-polish-qa-batch](../stories/frontend/ui-polish-qa-batch/intake.md) | [56](frontend/56-story-ui-polish-qa-batch.md) | To do |
 | 57 | BUG-21 | platform | [validation-message-quality](../stories/platform/validation-message-quality/intake.md) | [57](platform/57-story-validation-message-quality.md) | To do |
 
+## QA round 2 fixes (58–62)
+
+From the round 2 manual QA pass ([report](../qa/2026-10-01-manual-qa-report-round2.md), findings N2–N6). These were fixed straight away, so the plans are as-built. N1 (portal self-registration blocked while email is unconfigured) is part of story 49.
+
+| NN | Id | Feature | Intake | Plan | Status |
+|----|----|---------|--------|------|--------|
+| 58 | BUG-22 | frontend | [quick-reply-ticket-context](../stories/frontend/quick-reply-ticket-context/intake.md) | [58](frontend/58-story-quick-reply-ticket-context.md) | Done (web `48d8533`) |
+| 59 | BUG-23 | security-and-administration | [user-data-access-warning](../stories/security-and-administration/user-data-access-warning/intake.md) | [59](security-and-administration/59-story-user-data-access-warning.md) | Done (api `613e607`, web `6652669`) |
+| 60 | BUG-24 | knowledge-base | [article-feedback-limit](../stories/knowledge-base/article-feedback-limit/intake.md) | [60](knowledge-base/60-story-article-feedback-limit.md) | Done (api `93d98b1`, web `79460bd`) |
+| 61 | BUG-25 | platform | [upload-response-uploader-name](../stories/platform/upload-response-uploader-name/intake.md) | [61](platform/61-story-upload-response-uploader-name.md) | Done (api `91ec854`) |
+| 62 | BUG-26 | frontend | [task-past-date-warning](../stories/frontend/task-past-date-warning/intake.md) | [62](frontend/62-story-task-past-date-warning.md) | Done (web `b91dd22`) |
+
 Backend plans 20–36 are **as-built**: the code was implemented on `customer-support-crm-api` `develop` (commits `c3c7815`, `65c74a3`…`678ea67` and follow-ups) before the plans were written. Each plan cites the commit its line numbers refer to and lists where the code differs from the feature spec.
 
 Feature → plan coverage (backend + frontend) is in [../features/README.md](../features/README.md#plans-and-stories).

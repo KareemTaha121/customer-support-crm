@@ -54,6 +54,8 @@
 
 ## 3. 🆕 مشاكل جديدة
 
+> **تحديث:** تم إصلاح N2–N6 والتحقق منها في المتصفح والـ API (plans 58–62، انظر `plans/00-index.md` "QA round 2 fixes"). N1 ما زالت مفتوحة وتُحل مع plan 49.
+
 ### N1 🔴 عالية — التسجيل الذاتي في البوابة مستحيل محلياً (ومرتبط بـ H3)
 - **الخطوات:** `POST /public/portal/register` → 200 "a verification code has been sent" → `POST /public/portal/login` → `EMAIL_NOT_VERIFIED`.
 - **الفعلي:** رسالتا "Your verification code" في الـ outbox بحالة `Pending` ثم تفشل (قناة الإيميل غير مُعدّة). العميل الجديد لا يستطيع إكمال التسجيل بأي طريقة، ولا يرى أي رسالة توضّح المشكلة.
