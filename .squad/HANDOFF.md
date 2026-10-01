@@ -52,7 +52,15 @@ All 12 features are built on backend and frontend. Remaining work: the probable 
 
 ## Backend bug stories (NN 37–46)
 
-Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All ten are done (plans 37–46). The running local API must be restarted to pick them up.
+Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All ten are done (plans 37–46).
+
+**Runtime check (2026-10-01, api `dca992c`, local API on https://localhost:5001 + dev Postgres):** 59/59 scenarios from plans 37–46 passed and the API log had no 500s or errors.
+
+- Coverage: BUG-01 7, BUG-02 9, BUG-03 3, BUG-04 3, BUG-05 7, BUG-06 13, BUG-07 5, BUG-08 4, BUG-09 3, BUG-10 5.
+- BUG-01 was checked with real SignalR connections (`@microsoft/signalr`).
+- Not covered: the BUG-08 UI picker (browser) and the BUG-10 external upsert (it needs an API key).
+- The runs left test data with a `QA … <run id>` prefix in the dev database: branches, departments, roles, users, customers, tickets, categories and portal accounts. Two QA branches stay deactivated.
+- `chat.enabled` was set to `true`.
 
 ## Probable backend bugs (found while writing plans 20–36)
 
