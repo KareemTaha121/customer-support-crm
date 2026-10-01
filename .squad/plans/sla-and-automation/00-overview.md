@@ -7,6 +7,7 @@ Matching frontend plan: [../frontend/14-story-sla-and-automation-admin-ui.md](..
 | NN | Tracker id | Plan file | Title | Depends on | Status |
 |----|-----------|-----------|-------|-----------|--------|
 | 28 | SL-01 | [28-story-sla-policies-and-automation-engine.md](28-story-sla-policies-and-automation-engine.md) | SLA policies, assignment rules, escalation rules and the SLA evaluation job | Ticket Management 25–26 | Done |
+| 39 | BUG-03 | [39-story-ticket-sla-policy-foreign-key.md](39-story-ticket-sla-policy-foreign-key.md) | Clear ticket SLA policy references when a policy is deleted | 28 | Done (`3433f13`) |
 
 The plan is an **as-built** plan written after implementation, from the real code.
 
@@ -27,6 +28,6 @@ Known gaps and drift (spec vs as built):
 - **Notifications are in-app only** (`NotificationSender` + SignalR push); no `INotificationService` with email/SMS/WhatsApp adapters for staff, and **no notification preferences**.
 - **No separate `Features/Automation` / `Features/Notifications` slices** as in the spec; everything is in `Features/Sla` (notification list/read endpoints already existed from phase 3).
 - **Automation is logged only through the ticket events it causes** (priority, assignee, escalated, SLA rows); there is no history row naming the assignment rule.
-- **Deleting an SLA policy leaves a dangling `tickets.sla_policy_id`** (no FK; the handler comment says it is cleared, it is not). → BUG-03 ([intake](../../stories/sla-and-automation/ticket-sla-policy-foreign-key/intake.md))
+- ~~**Deleting an SLA policy leaves a dangling `tickets.sla_policy_id`** (no FK; the handler comment says it is cleared, it is not).~~ — fixed by story 39 (`3433f13`); [intake](../../stories/sla-and-automation/ticket-sla-policy-foreign-key/intake.md)
 - **Reopen does not reset SLA** due dates or breach flags.
 - **No tests** for SLA or automation in `tests/`.
