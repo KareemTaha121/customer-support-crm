@@ -14,7 +14,7 @@ Read this first in a new session. It replaces the old conversation.
 | Repo | Branch | State |
 |------|--------|-------|
 | `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–40, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
-| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `1ad5302`, BUG-01 to BUG-04 fixes; migration `AddTicketSlaPolicyForeignKey` not yet applied to a database). `docs/endpoints.md` lists every endpoint |
+| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `1ad5302`, BUG-01 to BUG-04 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed. `npx ng build`: 0 errors, 0 warnings |
 
 ## Frontend status (`customer-support-crm-web`)
