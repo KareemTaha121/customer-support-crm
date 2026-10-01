@@ -8,6 +8,7 @@ Matching frontend plan: [../frontend/11-story-tickets-ui.md](../frontend/11-stor
 |----|-----------|-----------|-------|-----------|--------|
 | 25 | TK-01 | [25-story-ticket-lifecycle.md](25-story-ticket-lifecycle.md) | Ticket lifecycle: create, update, list, assign, status, escalate, history | Phase 2, Phase 3, feature 01 | Done |
 | 26 | TK-02 | [26-story-ticket-conversation-and-categories.md](26-story-ticket-conversation-and-categories.md) | Ticket conversation, attachments, categories and event handlers | 25 | Done |
+| 43 | BUG-07 | [43-story-ticket-category-cycle-guard.md](43-story-ticket-category-cycle-guard.md) | Prevent cycles in ticket category parents | 26 | Done (`cedce62`) |
 
 Both plans are **as-built** plans written after implementation, from the real code. Their paths and line numbers refer to `develop` HEAD `2956767`.
 
@@ -27,7 +28,7 @@ Known gaps and drift (spec vs as built):
 - **No `tickets.close` / `tickets.reopen` permissions**; `POST /tickets/{id}/status` (incl. `"Reopen"`) needs `tickets.update`. A `tickets.delete` permission and soft delete were added.
 - **Assignment to agent only** (no team); department via `POST /tickets/{id}/transfer`.
 - **History is not complete**: no rows for subject/description/tag edits or messages.
-- **Priorities are a fixed enum** (Low/Medium/High/Urgent); no priority CRUD. **Categories have no delete** (`CATEGORY_IN_USE` declared but unused); category cycles beyond self-parenting are not detected (→ BUG-07, [intake](../../stories/ticket-management/ticket-category-cycle-guard/intake.md)).
+- **Priorities are a fixed enum** (Low/Medium/High/Urgent); no priority CRUD. **Categories have no delete** (`CATEGORY_IN_USE` declared but unused); ~~category cycles are not detected~~ (fixed by story 43, `cedce62`; [intake](../../stories/ticket-management/ticket-category-cycle-guard/intake.md)).
 - **No dedicated attachment entity**; the shared `Attachment` table is used. Unlinked uploads are never cleaned up.
 - **Ticket number is global**, not per organization (single-tenant).
 - **Reopen does not recompute SLA** due dates or clear breach flags.
