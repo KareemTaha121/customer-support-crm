@@ -13,8 +13,8 @@ Read this first in a new session. It replaces the old conversation.
 
 | Repo | Branch | State |
 |------|--------|-------|
-| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–44, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
-| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `e6bf4d7`, BUG-01 to BUG-08 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
+| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–45, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
+| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `5eb50e6`, BUG-01 to BUG-09 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed; HEAD `06c817a` (BUG-08 KB category dialog). `npx ng build`: 0 errors, 0 warnings |
 
 ## Frontend status (`customer-support-crm-web`)
@@ -50,7 +50,7 @@ All 12 features are built on backend and frontend. Remaining work: the probable 
 
 ## Backend bug stories (NN 37–45)
 
-Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). Next: BUG-09 (plan 45, resx sweep; BUG-06/07/08 are done).
+Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All nine are done (plans 37–45). The running local API must be restarted to pick them up.
 
 ## Probable backend bugs (found while writing plans 20–36)
 
@@ -60,7 +60,7 @@ Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("B
 - ~~`PUT /portal/me` returns the old name~~ — **fixed** in api `1ad5302` (BUG-04, plan 40). Same drift remains for staff renames via `PUT /customers/{id}` (no intake yet).
 - ~~`ORGANIZATION_UNIT_INACTIVE` is never thrown~~ — **fixed** in api `487e078` (BUG-06, plan 42; also added en messages for it and for `BRANCH_NOT_FOUND` / `DEPARTMENT_NOT_FOUND`).
 - ~~Category cycles are possible~~ — **fixed** for ticket categories (api `cedce62`, BUG-07) and KB categories (api `e6bf4d7` + web `06c817a`, BUG-08).
-- Missing resx entries: `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`, `WEBHOOK_DELIVERY_NOT_FOUND`; English resx lacks some domain codes (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`).
+- ~~Missing resx entries~~ — **fixed** in api `5eb50e6` (BUG-09, plan 45): `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`, `WEBHOOK_DELIVERY_NOT_FOUND` added in en/ar. Codes that are only in the ar file (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`, `INVALID_*`, …) have several English messages and are ar-only **by design**.
 - ~~Revoking portal access does not end portal sessions~~ — **fixed** in api `31d6d5a` + `6587e7d` (BUG-05, plan 41; re-grant reactivates the revoked account).
 
 ## Known gaps (low priority)
