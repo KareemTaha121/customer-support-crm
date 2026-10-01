@@ -13,8 +13,8 @@ Read this first in a new session. It replaces the old conversation.
 
 | Repo | Branch | State |
 |------|--------|-------|
-| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–41, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
-| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `6587e7d`, BUG-01 to BUG-05 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
+| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–42, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
+| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `487e078`, BUG-01 to BUG-06 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed. `npx ng build`: 0 errors, 0 warnings |
 
 ## Frontend status (`customer-support-crm-web`)
@@ -50,7 +50,7 @@ All 12 features are built on backend and frontend. Remaining work: the probable 
 
 ## Backend bug stories (NN 37–45)
 
-Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). Next: BUG-06 (plan 42).
+Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). Next: BUG-07 (plan 43).
 
 ## Probable backend bugs (found while writing plans 20–36)
 
@@ -58,7 +58,7 @@ Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("B
 - ~~`GET /tasks?ticketId=` / `?customerId=` skips scope; unknown task links fail as 500~~ — **fixed** in api `7058b62` (BUG-02, plan 38).
 - ~~`tickets.sla_policy_id` has no FK to `sla_policies`~~ — **fixed** in api `3433f13` (BUG-03, plan 39; new migration `AddTicketSlaPolicyForeignKey`).
 - ~~`PUT /portal/me` returns the old name~~ — **fixed** in api `1ad5302` (BUG-04, plan 40). Same drift remains for staff renames via `PUT /customers/{id}` (no intake yet).
-- `ORGANIZATION_UNIT_INACTIVE` is never thrown, so inactive branches/departments can still be assigned (plan 21).
+- ~~`ORGANIZATION_UNIT_INACTIVE` is never thrown~~ — **fixed** in api `487e078` (BUG-06, plan 42; also added en messages for it and for `BRANCH_NOT_FOUND` / `DEPARTMENT_NOT_FOUND`).
 - Category cycles are possible (only self-parenting blocked) for ticket and KB categories (plans 26, 29).
 - Missing resx entries: `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`, `WEBHOOK_DELIVERY_NOT_FOUND`; English resx lacks some domain codes (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`).
 - ~~Revoking portal access does not end portal sessions~~ — **fixed** in api `31d6d5a` + `6587e7d` (BUG-05, plan 41; re-grant reactivates the revoked account).

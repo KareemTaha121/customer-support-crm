@@ -58,6 +58,6 @@ Every feature has a backend plan, a frontend plan and story intakes. Plans live 
 | 09 | Reports & Management | [34](../plans/reports-and-management/00-overview.md) | [18](../plans/frontend/18-story-reports-ui.md) | Done |
 | 10 | Security & Administration | [01–07, 22](../plans/security-and-administration/00-overview.md) | [09](../plans/frontend/09-story-authentication-staff-and-portal.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
 | 11 | Integrations | [36](../plans/integrations/00-overview.md) | [19](../plans/frontend/19-story-administration-ui.md) | Done |
-| 12 | Platform | [20–21](../plans/platform/00-overview.md) | [08](../plans/frontend/08-story-core-platform-shell.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
+| 12 | Platform | [20–21, 42](../plans/platform/00-overview.md) | [08](../plans/frontend/08-story-core-platform-shell.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
 
 Backend plans 20–36 are as-built (written after the code). Each one has a deviations table listing where the code differs from this feature spec.
