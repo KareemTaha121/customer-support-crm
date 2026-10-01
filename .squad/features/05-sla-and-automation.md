@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §5
 > **Implementation phase:** Phase 7 — SLA & Automation
+> **Status:** Done (backend + frontend) — backend plans [28](../plans/sla-and-automation/00-overview.md), frontend plan [14](../plans/frontend/14-story-sla-and-automation-admin-ui.md)
 > **Build priority:** 9–10 (SLA → Notifications)
 
 ## Summary

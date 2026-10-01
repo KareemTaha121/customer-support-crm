@@ -40,3 +40,24 @@ Use each file as input for `squad new-story <feature-slug>`: split its user stor
 ```
 
 Every feature must satisfy the **Feature Definition of Done** (implementation plan §80).
+
+## Plans and stories
+
+Every feature has a backend plan, a frontend plan and story intakes. Plans live in `.squad/plans/<feature>/`, intakes in `.squad/stories/<feature>/<story>/intake.md`. Global `NN` order is in [../plans/00-index.md](../plans/00-index.md).
+
+| # | Feature | Backend plans | Frontend plan | Status |
+|---|---------|---------------|---------------|--------|
+| 01 | Customer Management | [23–24](../plans/customer-management/00-overview.md) | [10](../plans/frontend/10-story-customers-ui.md) | Done |
+| 02 | Ticket Management | [25–26](../plans/ticket-management/00-overview.md) | [11](../plans/frontend/11-story-tickets-ui.md) | Done |
+| 03 | Communication Channels | [32–33](../plans/communication-channels/00-overview.md) | [12](../plans/frontend/12-story-channels-and-live-chat-console.md) | Done |
+| 04 | Agent Dashboard | [27](../plans/agent-dashboard/00-overview.md) | [13](../plans/frontend/13-story-agent-dashboard-ui.md) | Done |
+| 05 | SLA & Automation | [28](../plans/sla-and-automation/00-overview.md) | [14](../plans/frontend/14-story-sla-and-automation-admin-ui.md) | Done |
+| 06 | Knowledge Base | [29](../plans/knowledge-base/00-overview.md) | [15](../plans/frontend/15-story-knowledge-base-ui.md) | Done |
+| 07 | AI Features | [35](../plans/ai-features/00-overview.md) | [16](../plans/frontend/16-story-ai-assistant-panels.md) | Done |
+| 08 | Customer Portal | [30–31](../plans/customer-portal/00-overview.md) | [17](../plans/frontend/17-story-customer-portal-ui.md) | Done |
+| 09 | Reports & Management | [34](../plans/reports-and-management/00-overview.md) | [18](../plans/frontend/18-story-reports-ui.md) | Done |
+| 10 | Security & Administration | [01–07, 22](../plans/security-and-administration/00-overview.md) | [09](../plans/frontend/09-story-authentication-staff-and-portal.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
+| 11 | Integrations | [36](../plans/integrations/00-overview.md) | [19](../plans/frontend/19-story-administration-ui.md) | Done |
+| 12 | Platform | [20–21](../plans/platform/00-overview.md) | [08](../plans/frontend/08-story-core-platform-shell.md), [19](../plans/frontend/19-story-administration-ui.md) | Done |
+
+Backend plans 20–36 are as-built (written after the code). Each one has a deviations table listing where the code differs from this feature spec.

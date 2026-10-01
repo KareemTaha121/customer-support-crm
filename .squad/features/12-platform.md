@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §12
 > **Implementation phase:** Phase 0 — Repository Foundation, Phase 1 — Backend Platform, Phase 3 — Organization Context
+> **Status:** Done (backend + frontend) — backend plans [20–21](../plans/platform/00-overview.md), frontend plans [08](../plans/frontend/08-story-core-platform-shell.md), [19](../plans/frontend/19-story-administration-ui.md)
 > **Build priority:** 1 (foundation — built first, used by every feature)
 
 ## Summary

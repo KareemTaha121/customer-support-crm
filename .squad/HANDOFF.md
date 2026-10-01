@@ -1,4 +1,4 @@
-# Session handoff (2026-09-30, third session)
+# Session handoff (2026-10-01, fourth session)
 
 Read this first in a new session. It replaces the old conversation.
 
@@ -13,7 +13,7 @@ Read this first in a new session. It replaces the old conversation.
 
 | Repo | Branch | State |
 |------|--------|-------|
-| `CRM` (this workspace, `.squad/`) | main | Frontend intakes (`.squad/stories/frontend/`) and **all plans 08–19** written |
+| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–36, 36 intakes. Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
 | `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed. `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed. `npx ng build`: 0 errors, 0 warnings |
 
@@ -38,9 +38,26 @@ Conventions, ownership rules and folder/route/i18n table: **`.squad/plans/fronte
 
 Integration points verified: `/knowledge-base/articles/:id` route exists for the AI panel links; `/help/articles/:slug` exists for portal chatbot links; the quick-reply picker is used by the ticket conversation and the chat console; en/ar key sets are identical for every scope.
 
+## Squad workspace (fourth session)
+
+- Backend features 01–09, 11, 12 had no plans. **As-built** plans and intakes were written for them, NN **20–36** (one folder per feature under `plans/` and `stories/`), plus **22** (system settings + audit export) in `security-and-administration`. Line numbers refer to the commit named at the top of each plan.
+- Each plan has a *Deviations* table (spec vs code) and each `00-overview.md` has *Known gaps*. Treat those as the backlog of spec items not built.
+- Every feature spec has a `Status` line linking its backend and frontend plans. `dotnet build` on api `2956767`: 0 warnings, 0 errors.
+
 ## Next steps
 
-All 12 features are built on backend and frontend. Remaining work is optional polish (see known gaps).
+All 12 features are built on backend and frontend. Remaining work: the probable bugs below, then the spec gaps listed in each plan's deviations table (write a new intake per fix).
+
+## Probable backend bugs (found while writing plans 20–36, not fixed)
+
+- `StaffHub.JoinConversation` has no permission or scope check: any staff connection can follow any chat conversation by id (plan 33).
+- `GET /tasks?ticketId=` / `?customerId=` skips the branch/department scope and returns every assignee's tasks; an unknown ticket/customer id on a task fails as 500 at the foreign key (plan 27).
+- `tickets.sla_policy_id` has no FK to `sla_policies`; deleting a policy leaves dangling ids, contrary to the handler comment (plan 28).
+- `PUT /portal/me` updates the customer name but returns the unchanged `CustomerAccount.DisplayName` (plan 30).
+- `ORGANIZATION_UNIT_INACTIVE` is never thrown, so inactive branches/departments can still be assigned (plan 21).
+- Category cycles are possible (only self-parenting blocked) for ticket and KB categories (plans 26, 29).
+- Missing resx entries: `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`, `WEBHOOK_DELIVERY_NOT_FOUND`; English resx lacks some domain codes (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`).
+- Revoking portal access does not end portal sessions (tokens up to 8 h) (plan 30).
 
 ## Known gaps (low priority)
 

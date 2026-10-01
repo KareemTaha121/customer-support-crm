@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §2
 > **Implementation phase:** Phase 5 — Tickets
+> **Status:** Done (backend + frontend) — backend plans [25–26](../plans/ticket-management/00-overview.md), frontend plan [11](../plans/frontend/11-story-tickets-ui.md)
 > **Build priority:** 5–7 (Tickets → Assignment/Status/History → Notes & Attachments)
 
 ## Summary

@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §6
 > **Implementation phase:** Phase 8 — Knowledge Base
+> **Status:** Done (backend + frontend) — backend plans [29](../plans/knowledge-base/00-overview.md), frontend plan [15](../plans/frontend/15-story-knowledge-base-ui.md)
 > **Build priority:** 11
 
 ## Summary

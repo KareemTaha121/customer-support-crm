@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §9
 > **Implementation phase:** Phase 11 — Reports
+> **Status:** Done (backend + frontend) — backend plans [34](../plans/reports-and-management/00-overview.md), frontend plan [18](../plans/frontend/18-story-reports-ui.md)
 > **Build priority:** 14
 
 ## Summary

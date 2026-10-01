@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §7
 > **Implementation phase:** Phase 12 — AI
+> **Status:** Done (backend + frontend) — backend plans [35](../plans/ai-features/00-overview.md), frontend plan [16](../plans/frontend/16-story-ai-assistant-panels.md)
 > **Build priority:** 15
 
 ## Summary

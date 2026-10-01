@@ -2,6 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §11
 > **Implementation phase:** Phase 13 — Advanced Integrations (provider adapters in Phase 10)
+> **Status:** Done (backend + frontend) — backend plans [36](../plans/integrations/00-overview.md), frontend plan [19](../plans/frontend/19-story-administration-ui.md)
 > **Build priority:** 16
 
 ## Summary
