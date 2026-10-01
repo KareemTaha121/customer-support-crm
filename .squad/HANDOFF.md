@@ -13,8 +13,8 @@ Read this first in a new session. It replaces the old conversation.
 
 | Repo | Branch | State |
 |------|--------|-------|
-| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–45, 45 intakes (36 feature stories + 9 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
-| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `5eb50e6`, BUG-01 to BUG-09 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
+| `CRM` (this workspace, `.squad/`) | main | Every feature has backend plans, a frontend plan and story intakes: plans 01–46, 46 intakes (36 feature stories + 10 bug stories). Index: `.squad/plans/00-index.md`; feature → plan matrix: `.squad/features/README.md` |
+| `customer-support-crm-api` | develop | Backend complete for all 12 features, pushed (HEAD `dca992c`, BUG-01 to BUG-10 fixes; migration `AddTicketSlaPolicyForeignKey` applied to the local dev database on 2026-10-01). `docs/endpoints.md` lists every endpoint |
 | `customer-support-crm-web` | main | Stories 08–19 all committed (one `feat(...)` commit per feature) and pushed; HEAD `06c817a` (BUG-08 KB category dialog). `npx ng build`: 0 errors, 0 warnings |
 
 ## Frontend status (`customer-support-crm-web`)
@@ -48,16 +48,16 @@ Integration points verified: `/knowledge-base/articles/:id` route exists for the
 
 All 12 features are built on backend and frontend. Remaining work: the probable bugs below, then the spec gaps listed in each plan's deviations table (write a new intake per fix).
 
-## Backend bug stories (NN 37–45)
+## Backend bug stories (NN 37–46)
 
-Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All nine are done (plans 37–45). The running local API must be restarted to pick them up.
+Each bug below has an intake; status and links in `.squad/plans/00-index.md` ("Bug fixes"). All ten are done (plans 37–46). The running local API must be restarted to pick them up.
 
 ## Probable backend bugs (found while writing plans 20–36)
 
 - ~~`StaffHub.JoinConversation` has no permission or scope check~~ — **fixed** in api `d2563dc` (BUG-01, plan 37).
 - ~~`GET /tasks?ticketId=` / `?customerId=` skips scope; unknown task links fail as 500~~ — **fixed** in api `7058b62` (BUG-02, plan 38).
 - ~~`tickets.sla_policy_id` has no FK to `sla_policies`~~ — **fixed** in api `3433f13` (BUG-03, plan 39; new migration `AddTicketSlaPolicyForeignKey`).
-- ~~`PUT /portal/me` returns the old name~~ — **fixed** in api `1ad5302` (BUG-04, plan 40). Same drift remains for staff renames via `PUT /customers/{id}` (no intake yet).
+- ~~`PUT /portal/me` returns the old name~~ — **fixed** in api `1ad5302` (BUG-04, plan 40). Staff and integration renames: **fixed** in api `dca992c` (BUG-10, plan 46).
 - ~~`ORGANIZATION_UNIT_INACTIVE` is never thrown~~ — **fixed** in api `487e078` (BUG-06, plan 42; also added en messages for it and for `BRANCH_NOT_FOUND` / `DEPARTMENT_NOT_FOUND`).
 - ~~Category cycles are possible~~ — **fixed** for ticket categories (api `cedce62`, BUG-07) and KB categories (api `e6bf4d7` + web `06c817a`, BUG-08).
 - ~~Missing resx entries~~ — **fixed** in api `5eb50e6` (BUG-09, plan 45): `CHAT_CLOSED`, `NO_ACTIVE_BRANCH`, `OUTBOUND_MESSAGE_NOT_FOUND`, `WEBHOOK_DELIVERY_NOT_FOUND` added in en/ar. Codes that are only in the ar file (`TICKET_CLOSED`, `INVALID_STATUS_TRANSITION`, `CATEGORY_NOT_FOUND`, `INVALID_*`, …) have several English messages and are ar-only **by design**.

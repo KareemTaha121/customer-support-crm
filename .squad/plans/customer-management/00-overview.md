@@ -7,6 +7,7 @@ Repo: `customer-support-crm-api`. Out of scope for every story: Docker, deployme
 |----|-----------|-----------|-------|-----------|--------|
 | 23 | CU-01 | [23-story-customer-profiles-and-contacts.md](23-story-customer-profiles-and-contacts.md) | Customer profiles, search, duplicates and contacts | Phase 2, Phase 3 | Done |
 | 24 | CU-02 | [24-story-customer-notes-attachments-and-history.md](24-story-customer-notes-attachments-and-history.md) | Customer notes, attachments and interaction history | 23 | Done |
+| 46 | BUG-10 | [46-story-staff-rename-portal-account-sync.md](46-story-staff-rename-portal-account-sync.md) | Customer renames by staff or integrations reach the portal account name | 23, 40 | Done (`dca992c`) |
 
 Both stories were implemented in `customer-support-crm-api` commit `0fd694e` (feat: add customer management (feature 01)) without plans; these are **as-built** plans and their paths and line numbers refer to `0fd694e`. Later commits that touch the feature: `0936711` (en/ar messages for the error codes), `678ea67` (the migration `20260930104602_AddSupportOperations` that creates the customer tables), `fdd93cd` (`docs/endpoints.md`). `00d3f35` (feature 08) added `CustomerAccount.RestartVerification` and the staff portal-access endpoints. Nothing in `Features/Customers` or `Features/Attachments` has changed since `0fd694e`.
 

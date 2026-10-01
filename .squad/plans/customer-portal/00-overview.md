@@ -31,7 +31,7 @@ Known gaps and drift (spec vs as built):
 - **No dedicated deflection or portal KB endpoints** — the portal uses `/api/v1/public/kb/*` (story 29).
 - ~~**Revoking portal access does not end sessions** — tokens (8 h, not refreshable) stay valid; accounts are not checked per request.~~ — fixed by story 41 (`31d6d5a`, `6587e7d`; re-granting a revoked account also works now); [intake](../../stories/customer-portal/revoke-portal-sessions-on-access-revoke/intake.md)
 - ~~**`PUT /portal/me` returns the old name** — it updates `Customer.Name`, but the profile's `name` is read from `CustomerAccount.DisplayName`, which is not changed.~~ — fixed by story 40 (`1ad5302`); [intake](../../stories/customer-portal/portal-profile-update-response/intake.md)
-- **Staff rename does not reach the portal** — `PUT /customers/{id}` updates `Customer.Name` but not `CustomerAccount.DisplayName`, so the portal keeps the old name after a staff edit (found while fixing BUG-04; no intake yet).
+- ~~**Staff rename does not reach the portal**~~ — fixed by [customer-management story 46](../customer-management/46-story-staff-rename-portal-account-sync.md) (BUG-10, `dca992c`), which also covers the external upsert; accounts with their own name keep it.
 - **Portal change-password** only checks length 12–128 and does not reject reusing the current password.
 - **Branding per organization** is served by Platform (`/api/v1/public/branding`), not by these stories.
 - **No tests** cover the portal.

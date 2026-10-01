@@ -18,9 +18,9 @@ One row per feature folder under `.squad/plans/`. `NN` continues as a global exe
 | [ai-features](ai-features/00-overview.md) | [07](../features/07-ai-features.md) | Summaries, suggested replies, categorization, solutions, chatbot | 35 | Done |
 | [integrations](integrations/00-overview.md) | [11](../features/11-integrations.md) | API keys, webhooks, providers, external systems | 36 | Done |
 
-## Bug fixes (37–45)
+## Bug fixes (37–46)
 
-Found while writing plans 20–36. One intake per bug under the feature's `stories/` folder; the plan is written when the fix starts.
+Found while writing plans 20–36 (BUG-10 while fixing BUG-04). One intake per bug under the feature's `stories/` folder; the plan is written when the fix starts.
 
 | NN | Id | Feature | Intake | Plan | Status |
 |----|----|---------|--------|------|--------|
@@ -33,6 +33,7 @@ Found while writing plans 20–36. One intake per bug under the feature's `stori
 | 43 | BUG-07 | ticket-management | [ticket-category-cycle-guard](../stories/ticket-management/ticket-category-cycle-guard/intake.md) | [43](ticket-management/43-story-ticket-category-cycle-guard.md) | Done (`cedce62`) |
 | 44 | BUG-08 | knowledge-base | [knowledge-category-cycle-guard](../stories/knowledge-base/knowledge-category-cycle-guard/intake.md) | [44](knowledge-base/44-story-knowledge-category-cycle-guard.md) | Done (api `e6bf4d7`, web `06c817a`) |
 | 45 | BUG-09 | platform | [missing-error-messages](../stories/platform/missing-error-messages/intake.md) | [45](platform/45-story-missing-error-messages.md) | Done (`5eb50e6`) |
+| 46 | BUG-10 | customer-management | [staff-rename-portal-account-sync](../stories/customer-management/staff-rename-portal-account-sync/intake.md) | [46](customer-management/46-story-staff-rename-portal-account-sync.md) | Done (`dca992c`) |
 
 Backend plans 20–36 are **as-built**: the code was implemented on `customer-support-crm-api` `develop` (commits `c3c7815`, `65c74a3`…`678ea67` and follow-ups) before the plans were written. Each plan cites the commit its line numbers refer to and lists where the code differs from the feature spec.
 

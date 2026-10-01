@@ -2,7 +2,7 @@
 
 > **Source:** AZM Squad Customer Support CRM — Core Features §1
 > **Implementation phase:** Phase 4 — Customers
-> **Status:** Done (backend + frontend) — backend plans [23–24](../plans/customer-management/00-overview.md), frontend plan [10](../plans/frontend/10-story-customers-ui.md)
+> **Status:** Done (backend + frontend) — backend plans [23–24, 46](../plans/customer-management/00-overview.md), frontend plan [10](../plans/frontend/10-story-customers-ui.md)
 > **Build priority:** 4 (after Platform, Identity, Organization Context)
 
 ## Summary

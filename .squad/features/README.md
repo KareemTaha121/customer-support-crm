@@ -47,7 +47,7 @@ Every feature has a backend plan, a frontend plan and story intakes. Plans live 
 
 | # | Feature | Backend plans | Frontend plan | Status |
 |---|---------|---------------|---------------|--------|
-| 01 | Customer Management | [23–24](../plans/customer-management/00-overview.md) | [10](../plans/frontend/10-story-customers-ui.md) | Done |
+| 01 | Customer Management | [23–24, 46](../plans/customer-management/00-overview.md) | [10](../plans/frontend/10-story-customers-ui.md) | Done |
 | 02 | Ticket Management | [25–26, 43](../plans/ticket-management/00-overview.md) | [11](../plans/frontend/11-story-tickets-ui.md) | Done |
 | 03 | Communication Channels | [32–33, 37](../plans/communication-channels/00-overview.md) | [12](../plans/frontend/12-story-channels-and-live-chat-console.md) | Done |
 | 04 | Agent Dashboard | [27, 38](../plans/agent-dashboard/00-overview.md) | [13](../plans/frontend/13-story-agent-dashboard-ui.md) | Done |

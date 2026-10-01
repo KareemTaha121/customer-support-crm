@@ -24,7 +24,7 @@ After the fix, the endpoint renames the account in the same `SaveChanges` as the
 
 **Not in scope, found while fixing:**
 
-- **Staff rename has the same drift.** `PUT /customers/{id}` (`Features/Customers/CustomerProfileSlices.cs` line 165) updates `Customer.Name` but not the portal account, so after a staff rename the portal still shows the old name. Fixing it means calling `CustomerAccount.Rename` there too, or making the profile read `Customer.Name`. Listed in the overview's Known gaps.
+- **Staff rename has the same drift.** `PUT /customers/{id}` (`Features/Customers/CustomerProfileSlices.cs` line 165) updates `Customer.Name` but not the portal account, so after a staff rename the portal still shows the old name. Fixing it means calling `CustomerAccount.Rename` there too, or making the profile read `Customer.Name`. Fixed later by BUG-10 ([../customer-management/46-story-staff-rename-portal-account-sync.md](../customer-management/46-story-staff-rename-portal-account-sync.md), `dca992c`).
 - **An existing token keeps the old name claim** until the customer signs in again. That is acceptable, because tokens last at most 8 hours.
 
 ---
@@ -86,7 +86,7 @@ Test projects are **out of scope**: `tests/` must not be modified. No existing t
 
 - [x] The `PUT /portal/me` response and a following `GET /portal/me` show the new name.
 - [x] Account creation and rename share one name rule.
-- [ ] Staff rename (`PUT /customers/{id}`) also updates the portal account. Not in this story; see Known gaps.
+- [x] Staff rename (`PUT /customers/{id}`) also updates the portal account — done separately in BUG-10 (plan 46).
 - [x] Nothing changed in `tests/`, `docker-compose.yml`, `deploy/` or `.github/`.
 - [x] `dotnet build` passes with zero warnings.
 
